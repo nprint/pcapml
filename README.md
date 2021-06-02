@@ -1,6 +1,6 @@
 # pcapml
 
-pcapml standardizes network traffic analysis tasks, improving reproducability by directly coupling metadata and raw traffic traces. On the dataset curation side, pcapml enables researchers to directly encode metadata into raw traffic traces in such a way that classic libraries and tools such as `tcpdump` and `tshark` can still be leveraged. On the analysis side, pypcapml leverages the standardized format, exposing a python interface that reads metadata-encoded pcapml output, enabling the user to focus on extracting interesting information from traffic sequences. 
+`pcapml` standardizes network traffic analysis tasks, improving reproducability by directly coupling metadata and raw traffic traces. On the dataset curation side, pcapml enables researchers to directly encode metadata into raw traffic traces in such a way that classic libraries and tools such as `tcpdump` and `tshark` can still be leveraged. On the analysis side, pypcapml leverages the standardized format, exposing a python interface that reads metadata-encoded pcapml output, enabling the user to focus on extracting interesting information from traffic sequences. 
 
 There will be bugs! Please report any you see.
 
