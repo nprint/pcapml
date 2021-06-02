@@ -5,21 +5,21 @@
  * of the License at https://www.apache.org/licenses/LICENSE-2.0
  */
 
-#ifndef PCAPML_SAMPLER
-#define PCAPML_SAMPLER
+#ifndef INCLUDE_SAMPLE_SAMPLER_HPP_
+#define INCLUDE_SAMPLE_SAMPLER_HPP_
 
 #include "block.hpp"
-#include "pcapng_reader.hpp"
 #include "sample.hpp"
+#include "pcapng_reader.hpp"
 
 class Sampler : public PcapNGReader {
-    public:
-        bool process_block(Block *b, void *p);
-        Sample *get_next_sample();
-    private:
-        bool last_sample=false;
-        Sample *cur_sample = NULL;
+ public:
+    bool process_block(Block *b, void *p);
+    Sample *get_next_sample();
+ private:
+    bool last_sample = false;
+    Sample *cur_sample = NULL;
 };
 
 
-#endif
+#endif  // INCLUDE_SAMPLE_SAMPLER_HPP_

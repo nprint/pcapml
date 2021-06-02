@@ -5,8 +5,8 @@
  * of the License at https://www.apache.org/licenses/LICENSE-2.0
  */
 
-#ifndef DIR_LABELER
-#define DIR_LABELER
+#ifndef INCLUDE_DIR_DIR_HPP_
+#define INCLUDE_DIR_DIR_HPP_
 
 #define DIR_LABEL_FILE_LOC 0
 #define DIR_LABEL_LABEL_LOC 1
@@ -30,17 +30,18 @@
 #include "util.hpp"
 
 class DirLabeler {
-    public:
-        int label_dir(std::string dir, std::string label_file,
+ public:
+    int label_dir(std::string dir, std::string label_file,
                       std::string outfile);
-    private:
-        PcapNGWriter w;
-        std::string get_sid(std::string infile, std::string label);
-        int label_file(char *f, std::string sid, std::string label, std::string outfile);
-        int process_directory(std::string dir, std::string outfile);
-        int load_labels(std::string label_file);
-        std::map<std::string, std::string> labels;
-        std::set<std::string> sids;
+ private:
+    PcapNGWriter w;
+    std::string get_sid(std::string infile, std::string label);
+    int label_file(char *f, std::string sid, std::string label,
+                   std::string outfile);
+    int process_directory(std::string dir, std::string outfile);
+    int load_labels(std::string label_file);
+    std::map<std::string, std::string> labels;
+    std::set<std::string> sids;
 };
 
-#endif
+#endif  // INCLUDE_DIR_DIR_HPP_

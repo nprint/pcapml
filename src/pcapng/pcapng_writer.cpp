@@ -8,17 +8,16 @@
 #include "pcapng_writer.hpp"
 
 int PcapNGWriter::open_file(char *f, bool append) {
-    if(!(check_file_exists(f))) {
-        if(append) {
+    if (!(check_file_exists(f))) {
+        if (append) {
             return 1;
         }
         pcapng = fopen(f, "wb");
-    }
-    else {
+    } else {
         pcapng = fopen(f, "wb");
     }
 
-    if(pcapng == NULL) {
+    if (pcapng == NULL) {
         return 1;
     }
 
@@ -39,7 +38,7 @@ int PcapNGWriter::write_section_block() {
     SectionInfoBlock sib;
 
     block_len = BASE_BLOCK_LEN + sizeof(SectionInfoBlock);
-    
+
     write_block_header(SECTION_HEADER, block_len);
 
     sib.magic = MAGICA;
@@ -69,7 +68,7 @@ int PcapNGWriter::write_block_header(uint32_t block_type, uint32_t len) {
 
 int PcapNGWriter::write_block_trailer(uint32_t len) {
     uint32_t trailer, rv;
-    
+
     DEBUG_PRINT(("WRITE: BT: 4 bytes\n"));
     trailer = len;
     rv = fwrite((void *) &trailer, 1, sizeof(uint32_t), pcapng);
@@ -84,7 +83,7 @@ int PcapNGWriter::write_interface_block(uint16_t link_type, uint32_t snap_len) {
     block_len = BASE_BLOCK_LEN + sizeof(InterfaceDescription);
 
     write_block_header(INTERFACE_HEADER, block_len);
-    
+
     /* Default to ethernet for now, we should read this then react */
     idb.link_type = link_type;
     idb.reserved = 0;
@@ -107,12 +106,12 @@ int PcapNGWriter::write_epb_from_pcap_pkt(pcap_packet_info *p, std::string comme
     epb.ts_low = p->hdr.ts.tv_usec;
     epb.cap_len = p->hdr.caplen;
     epb.og_len = p->hdr.len;
-    
+
     /* Base header + EPB header + packet + packet padding + comment 
      * + comment padding + option headers * 2 (end of options & comment)
     */
     block_len = BASE_BLOCK_LEN + sizeof(EnhancedPacketBlock) + epb.cap_len \
-        + comment.size() + (OPTION_HEADER_LEN * 2) + get_pad_len(epb.cap_len) + 
+        + comment.size() + (OPTION_HEADER_LEN * 2) + get_pad_len(epb.cap_len) +
         get_pad_len(comment.size());
 
     write_block_header(ENHANCED_PKT_HEADER, block_len);
@@ -132,12 +131,12 @@ int PcapNGWriter::write_option(uint16_t code, uint16_t len, uint8_t *buf) {
     DEBUG_PRINT(("WRITE: option: code: %d, len: %d\n", code, len));
     fwrite((void *) &code, sizeof(uint16_t), 1, pcapng);
     fwrite((void *) &len, sizeof(uint16_t), 1, pcapng);
-    if(code != 0 && len != 0) {
+    if (code != 0 && len != 0) {
         DEBUG_PRINT(("WRITE: OBUF: %d bytes\n", len));
         fwrite((void *) buf, len, 1, pcapng);
         pad_packet(len);
     }
- 
+
     return 0;
 }
 
@@ -149,7 +148,7 @@ int PcapNGWriter::pad_packet(int pkt_len) {
     byte[2] = 0x00;
 
     n = get_pad_len(pkt_len);
-    if(n < 0) {
+    if (n < 0) {
         return -1;
     }
 
@@ -160,7 +159,7 @@ int PcapNGWriter::pad_packet(int pkt_len) {
 }
 
 int PcapNGWriter::get_pad_len(int len) {
-    switch(len % 4) {
+    switch (len % 4) {
         case 0:
             return 0;
         case 1:

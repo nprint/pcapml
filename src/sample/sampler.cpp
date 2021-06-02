@@ -18,34 +18,33 @@ Sample *Sampler::get_next_sample() {
     uint8_t *pkt_buf;
     std::string pkt_comment, label;
     Sample *return_sample;
-    
+
     Block *b;
     EnhancedPacketBlock *epb;
 
-    while(1) {
+    while (1) {
         b = read_block();
-        if(b == NULL) {
+        if (b == NULL) {
             /* End of file, need to return last sample then on next call bail */
-            if(last_sample == false) {
+            if (last_sample == false) {
                 return_sample = cur_sample;
                 last_sample = true;
                 break;
-            }
-            else {
+            } else {
                 return_sample = NULL;
                 break;
             }
         }
-        
+
         /* Skip non packet blocks */
-        if(b->get_block_type() != ENHANCED_PKT_HEADER) continue;
+        if (b->get_block_type() != ENHANCED_PKT_HEADER) continue;
 
         /* Get sampleID and label */
         pkt_comment = get_pkt_comment(b);
         std::tie(sid, label) = get_info_from_pkt_comment(pkt_comment);
-    
+
         /* First sample */
-        if(cur_sample == NULL) {
+        if (cur_sample == NULL) {
             cur_sample = new Sample(sid, label);
         }
         /* Get Timestamp */
@@ -58,13 +57,12 @@ Sample *Sampler::get_next_sample() {
         /* Copy packet buf */
         pkt_buf = new uint8_t[pkt_len];
         memcpy(pkt_buf, b->get_data_buf(), pkt_len);
-        
+
         /* Same sample */
-        if(cur_sample->get_sid() == sid) {
+        if (cur_sample->get_sid() == sid) {
             cur_sample->add_pkt(pkt_buf, pkt_len, pkt_ts);
-        }
-        /* New sample */
-        else { 
+        } else {
+            /* New sample */
             return_sample = cur_sample;
             cur_sample = new Sample(sid, label);
             cur_sample->add_pkt(pkt_buf, pkt_len, pkt_ts);

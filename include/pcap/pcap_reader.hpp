@@ -5,8 +5,8 @@
  * of the License at https://www.apache.org/licenses/LICENSE-2.0
  */
 
-#ifndef PCAP_READER
-#define PCAP_READER
+#ifndef INCLUDE_PCAP_PCAP_READER_HPP_
+#define INCLUDE_PCAP_PCAP_READER_HPP_
 
 #if defined(__NetBSD__)
 #include <net/if_ether.h>
@@ -20,14 +20,13 @@
 #include "util.hpp"
 
 class PcapReader {
-  public:
+ public:
     int open_file(char *infile);
     void close_file();
     pcap_packet_info *get_next_packet();
-
-  private:
+ private:
     pcap_t *f;
     pcap_t *get_pcap_handle();
 };
 
-#endif
+#endif  // INCLUDE_PCAP_PCAP_READER_HPP_

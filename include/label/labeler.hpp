@@ -5,28 +5,28 @@
  * of the License at https://www.apache.org/licenses/LICENSE-2.0
  */
 
-#ifndef LABELER
-#define LABELER
+#ifndef INCLUDE_LABEL_LABELER_HPP_
+#define INCLUDE_LABEL_LABELER_HPP_
 
+#include <vector>
 #include <fstream>
 
-#include "pcap_reader.hpp"
-#include "pcapng_writer.hpp"
 #include "util.hpp"
 #include "label.hpp"
+#include "pcap_reader.hpp"
+#include "pcapng_writer.hpp"
 
 #define LABEL_FILE_LOC  0
 #define FILTER_LOC 1
 #define TS_START   2
 #define TS_END     3
 
-
 class PcapMLLabeler {
-    public:
-        bool load_labels(char *label_file);
-        bool label_pcap(char *pcap, char *outfile);
-    private:
-        std::vector<Label *> labels;
+ public:
+    bool load_labels(char *label_file);
+    bool label_pcap(char *pcap, char *outfile);
+ private:
+    std::vector<Label *> labels;
 };
 
-#endif 
+#endif  // INCLUDE_LABEL_LABELER_HPP_

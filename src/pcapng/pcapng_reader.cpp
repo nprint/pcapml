@@ -5,15 +5,15 @@
  * of the License at https://www.apache.org/licenses/LICENSE-2.0
  */
 
-#include "pcapng_reader.hpp" 
+#include "pcapng_reader.hpp"
 
 int PcapNGReader::open_pcapng(char *infile) {
     packets_processed = 0;
     sys_e = get_sys_endianness();
-    
+
     f = fopen(infile , "r");
-    if(f == NULL) {
-        fprintf(stderr, "Error opening file: %s\n", infile); 
+    if (f == NULL) {
+        fprintf(stderr, "Error opening file: %s\n", infile);
         return 1;
     }
 
@@ -23,26 +23,26 @@ int PcapNGReader::open_pcapng(char *infile) {
 std::string PcapNGReader::get_pkt_comment(Block *b) {
     Option *o;
     std::string s;
-    
+
     s = "";
     o = b->get_option_by_code(PKT_COMMENT_OPTION);
-    if(o == NULL) {
+    if (o == NULL) {
         return s;
-    } 
-    
+    }
+
     s = std::string((char *) o->buf, o->header->length);
-    
+
     return s;
 }
 
 int PcapNGReader::close_pcapng() {
     uint32_t rv;
-    
+
     rv = fclose(f);
 
-    if(rv != 0) {
+    if (rv != 0) {
         fprintf(stderr, "Error closing file handle\n");
-    };
+    }
 
     return rv;
 }
@@ -51,21 +51,21 @@ Block *PcapNGReader::read_block() {
     uint64_t cur_block_start;
     BlockHeader *bh;
     Block *b;
-    
-    if(feof(f)) {
+
+    if (feof(f)) {
         return NULL;
     }
 
     /* Keep track of file location and block bytes we've read */
     block_bytes_read = 0;
     cur_block_start = ftell(f);
-    
+
     /* Read header of block as its always the same and tells us what to do */
     bh = new BlockHeader;
     read_and_update((void *) bh, sizeof(BlockHeader));
-    
+
     /* Check if block is jank */
-    if(bh->length == 0) {
+    if (bh->length == 0) {
         delete bh;
         return NULL;
     }
@@ -75,7 +75,7 @@ Block *PcapNGReader::read_block() {
     DEBUG_PRINT(("!Reading New Block!\n"));
     DEBUG_PRINT(("  Block start: %ld, block_end: %ld\n", cur_block_start, cur_block_start + bh->length));
     DEBUG_PRINT(("  Block Size: %u, Block type: %u\n", bh->length, bh->type));
-    switch(bh->type) {
+    switch (bh->type) {
         case SECTION_HEADER:
             read_section_header(b);
             break;
@@ -94,8 +94,10 @@ Block *PcapNGReader::read_block() {
     return b;
 }
 
-void PcapNGReader::read_unknown(Block *b) { 
-    //b->print(stderr);
+void PcapNGReader::read_unknown(Block *b) {
+    fprintf(stderr, "Unknown block type, printing block and exiting\n");
+    b->print(stderr);
+    exit(3);
 }
 
 void PcapNGReader::read_eph(Block *b) {
@@ -122,51 +124,50 @@ void PcapNGReader::read_eph(Block *b) {
     b->set_data_buf(buf);
 
     read_and_update((void *) buf, chunk_size_to_read);
-    
+
     /* Skip rest of packet for now, need to loop here to save big ones */
-    if(chunk_size_to_read < epb->cap_len) {
+    if (chunk_size_to_read < epb->cap_len) {
         seek_and_update(epb->cap_len - chunk_size_to_read);
     }
 
-   /* Data gets padded to 32 bit boundary, need to skip it */
-   padding = get_padding(epb->cap_len);
-   if(padding != 0) {
+    /* Data gets padded to 32 bit boundary, need to skip it */
+    padding = get_padding(epb->cap_len);
+    if (padding != 0) {
        seek_and_update(padding);
-   }
-    
-   /* Packet options, where we store the comments */
-   if(b->get_block_length() - block_bytes_read > TRAILER_LEN) {
+    }
+
+    /* Packet options, where we store the comments */
+    if (b->get_block_length() - block_bytes_read > TRAILER_LEN) {
        read_options(b);
-   }
-//
-   /* End of block length read */
-   eob_read = b->get_block_length() - block_bytes_read;
-   seek_and_update(eob_read);
+    }
+    //
+    /* End of block length read */
+    eob_read = b->get_block_length() - block_bytes_read;
+    seek_and_update(eob_read);
 }
 
 void PcapNGReader::read_options(Block *b) {
-   Option *o;
-   uint8_t *buf;
-   OptionHeader *oh;
-   
-   DEBUG_PRINT(("      Processing options in epb\n"));
-   while(1) {
-       oh = new OptionHeader;
-       read_and_update((void *) oh, sizeof(OptionHeader));
-       DEBUG_PRINT(("        Option code: %d, option length: %d\n", oh->code, oh->length));
-       if(oh->code == 0 || oh->length == 0) {
+    Option *o;
+    uint8_t *buf;
+    OptionHeader *oh;
+
+    DEBUG_PRINT(("      Processing options in epb\n"));
+    while (1) {
+        oh = new OptionHeader;
+        read_and_update((void *) oh, sizeof(OptionHeader));
+        DEBUG_PRINT(("        Option code: %d, option length: %d\n", oh->code, oh->length));
+        if (oh->code == 0 || oh->length == 0) {
             delete oh;
             break;
-       }
-       else {
-         o = new Option;
-         o->header = oh;
-         buf = new uint8_t[oh->length + 1];
-         read_and_update((void *) buf, oh->length + 1);
-         o->buf = buf;
-       }
-       b->add_option(o);
-   }
+        } else {
+            o = new Option;
+            o->header = oh;
+            buf = new uint8_t[oh->length + 1];
+            read_and_update((void *) buf, oh->length + 1);
+            o->buf = buf;
+        }
+        b->add_option(o);
+    }
 }
 
 void PcapNGReader::read_idb(Block *b) {
@@ -177,7 +178,7 @@ void PcapNGReader::read_idb(Block *b) {
     id = new InterfaceDescription;
 
     read_and_update((void *) id, sizeof(InterfaceDescription));
-    
+
     /* read the rest */
     /* TODO formally read these into a buffer if we care */
     eob_read = b->get_block_length() - block_bytes_read;
@@ -198,7 +199,7 @@ void PcapNGReader::read_section_header(Block *b) {
     read_and_update((void *) sib, sizeof(SectionInfoBlock));
     sec_e = get_sec_endianness((uint8_t *) &sib->magic);
     DEBUG_PRINT(("      section endianness: %d\n", sec_e));
-    
+
     /* read the rest that we don't care about */
     /* TODO at some point, we may want to parse these options formally */
     eob_read = b->get_block_length() - block_bytes_read;
@@ -208,10 +209,9 @@ void PcapNGReader::read_section_header(Block *b) {
 }
 
 uint8_t PcapNGReader::get_sys_endianness() {
-    if(htonl(42) == 42) {
+    if (htonl(42) == 42) {
         return BIG_END;
-    }
-    else {
+    } else {
         return LITTLE_END;
     }
 }
@@ -227,7 +227,7 @@ uint8_t PcapNGReader::get_sec_endianness(uint8_t *magic) {
 }
 
 uint8_t PcapNGReader::get_padding(uint32_t n) {
-    switch(n % 4) {
+    switch (n % 4) {
         case 0:
             return 0;
         case 1:
@@ -241,16 +241,16 @@ uint8_t PcapNGReader::get_padding(uint32_t n) {
     }
 }
 
-void PcapNGReader::print_state() { 
+void PcapNGReader::print_state() {
     DEBUG_PRINT(("PcapNGReader State:\n"));
     DEBUG_PRINT(("  number of Packets Processed: %d\n", packets_processed));
 }
 
 bool PcapNGReader::seek_and_update(uint32_t len) {
     uint32_t rv;
-    
+
     rv = fseek(f, len, SEEK_CUR);
-    if(rv != 0) {
+    if (rv != 0) {
         return false;
     }
 
@@ -264,7 +264,7 @@ bool PcapNGReader::read_and_update(void *buf, uint32_t len) {
     uint32_t rv;
 
     rv = fread(buf, 1, len, f);
-    if(rv != len) {
+    if (rv != len) {
         return false;
     }
 

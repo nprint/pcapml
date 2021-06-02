@@ -17,11 +17,10 @@ Block::Block(BlockHeader *bh, uint64_t f_start) {
 void Block::print(FILE *stream) {
     fprintf(stream, "Block {\n");
     fprintf(stream, "  Header {\n");
-    if(bh == NULL) {
+    if (bh == NULL) {
         fprintf(stream, "    type:   NULL\n");
         fprintf(stream, "    length: NULL\n");
-    }
-    else {
+    } else {
         fprintf(stream, "    type:   %u\n", bh->type);
         fprintf(stream, "    type:   %u\n", bh->length);
     }
@@ -37,8 +36,8 @@ Block::~Block() {
     uint64_t i;
 
     /* Actual block buf that is dependent on type of block */
-    if(block_buf != NULL) {
-        switch(get_block_type()) {
+    if (block_buf != NULL) {
+        switch (get_block_type()) {
             case SECTION_HEADER:
                 delete (SectionInfoBlock *) block_buf;
                 break;
@@ -53,17 +52,17 @@ Block::~Block() {
         }
     }
     /* 8 Byte block header after deleting data dependent on it */
-    if(bh != NULL) {
+    if (bh != NULL) {
         delete bh;
     }
 
     /* data buf in memory */
-    if(data_buf != NULL) {
+    if (data_buf != NULL) {
         delete data_buf;
     }
-    
-    for(i = 0; i < options.size(); i++) {
-        delete options[i]; 
+
+    for (i = 0; i < options.size(); i++) {
+        delete options[i];
     }
 }
 
@@ -71,8 +70,8 @@ Block::~Block() {
  * could move to a map with a list / return a vector */
 Option *Block::get_option_by_code(uint16_t code) {
     uint32_t i;
-    for(i = 0; i < options.size(); i++) {
-        if(options[i]->header->code == code) return options[i];
+    for (i = 0; i < options.size(); i++) {
+        if (options[i]->header->code == code) return options[i];
     }
 
     return NULL;

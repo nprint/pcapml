@@ -10,9 +10,9 @@
 int PcapReader::open_file(char *infile) {
     char errbuf[PCAP_ERRBUF_SIZE];
 
-	f = pcap_open_offline_with_tstamp_precision(
-		infile, PCAP_TSTAMP_PRECISION_MICRO, errbuf);
-    
+    f = pcap_open_offline_with_tstamp_precision(
+        infile, PCAP_TSTAMP_PRECISION_MICRO, errbuf);
+
     return 0;
 }
 
@@ -26,7 +26,7 @@ pcap_packet_info *PcapReader::get_next_packet() {
     pcap_packet_info *pi;
 
     buf = pcap_next(f, &hdr);
-    if(buf == NULL) {
+    if (buf == NULL) {
         return NULL;
     }
     pi = new pcap_packet_info;

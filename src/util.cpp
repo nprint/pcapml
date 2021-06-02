@@ -7,11 +7,10 @@
 
 #include "util.hpp"
 
-void tokenize_string(std::string s, std::vector<std::string> &to_fill, 
+void tokenize_string(std::string s, std::vector<std::string> &to_fill,
                      char delimiter) {
-
-   std::string token;
-   std::stringstream ss;
+    std::string token;
+    std::stringstream ss;
 
     to_fill.clear();
     ss.str(s);

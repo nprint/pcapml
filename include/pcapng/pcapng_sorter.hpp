@@ -5,8 +5,8 @@
  * of the License at https://www.apache.org/licenses/LICENSE-2.0
  */
 
-#ifndef PCAPNG_SORTER
-#define PCAPNG_SORTER
+#ifndef INCLUDE_PCAPNG_PCAPNG_SORTER_HPP_
+#define INCLUDE_PCAPNG_PCAPNG_SORTER_HPP_
 
 #include <vector>
 #include <algorithm>
@@ -19,29 +19,27 @@ struct PacketSortInfo {
     size_t sid;
     uint64_t ts;
     FileWindow fw;
-    
-    bool operator<(PacketSortInfo &rhs) {
-        if(rhs.sid == sid) {
+
+    bool operator<(const PacketSortInfo &rhs) {
+        if (rhs.sid == sid) {
             return rhs.ts < ts;
-        }
-        else
-        {
+        } else {
             return rhs.sid < sid;
         }
     }
 };
 
 class Sorter : public PcapNGReader {
-    public:
-        bool process_block(Block *b, void *p);
-        int sort_pcapng(char *infile, char *outfile);
-    private:
-        bool process_packet_block(Block *b);
-        int copy_output(char *infile, char *outfile);
-        int copy_range(FileWindow fw, FILE *in, FILE *out);
-        std::vector<FileWindow> section_headers;
-        std::vector<FileWindow> idbs;
-        std::vector<PacketSortInfo> pkt_blocks;
+ public:
+    bool process_block(Block *b, void *p);
+    int sort_pcapng(char *infile, char *outfile);
+ private:
+    bool process_packet_block(Block *b);
+    int copy_output(char *infile, char *outfile);
+    int copy_range(FileWindow fw, FILE *in, FILE *out);
+    std::vector<FileWindow> section_headers;
+    std::vector<FileWindow> idbs;
+    std::vector<PacketSortInfo> pkt_blocks;
 };
 
-#endif
+#endif  // INCLUDE_PCAPNG_PCAPNG_SORTER_HPP_

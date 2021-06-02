@@ -5,13 +5,14 @@
  * of the License at https://www.apache.org/licenses/LICENSE-2.0
  */
 
-#ifndef BLOCK
-#define BLOCK
+#ifndef INCLUDE_PCAPNG_BLOCK_HPP_
+#define INCLUDE_PCAPNG_BLOCK_HPP_
 
-#include <vector>
 #include <stdio.h>
 #include <stdlib.h>
 #include <inttypes.h>
+
+#include <vector>
 
 #define SECTION_HEADER      0x0a0d0d0a
 #define INTERFACE_HEADER    0x00000001
@@ -68,8 +69,8 @@ struct Option {
     void *buf = NULL;
 
     ~Option() {
-        if(header != NULL) delete header;
-        if(buf != NULL)    delete (uint8_t *) buf;
+        if (header != NULL) delete header;
+        if (buf != NULL)    delete (uint8_t *) buf;
     }
 };
 
@@ -79,26 +80,26 @@ struct FileWindow {
 };
 
 class Block {
-    public:
-        void print(FILE *stream);
-        Block(BlockHeader *bh, uint64_t f_start);
-        ~Block();
-        void set_block_buf(void *buf);
-        void *get_block_buf();
-        void set_data_buf(uint8_t *buf);
-        uint8_t *get_data_buf();
-        void add_option(Option *o);
-        uint32_t get_block_length();
-        uint32_t get_block_type();
-        FileWindow get_file_window();
-        Option *get_option_by_code(uint16_t code);
-    private:
-        BlockHeader *bh = NULL; // 8 Byte Header Object
-        void *block_buf = NULL; // Actual Block Header of specific type
-        uint8_t *data_buf = NULL; // Raw data buf, stripped of padding
-        struct FileWindow fw;
-        std::vector<Option *> options;
+ public:
+    void print(FILE *stream);
+    Block(BlockHeader *bh, uint64_t f_start);
+    ~Block();
+    void set_block_buf(void *buf);
+    void *get_block_buf();
+    void set_data_buf(uint8_t *buf);
+    uint8_t *get_data_buf();
+    void add_option(Option *o);
+    uint32_t get_block_length();
+    uint32_t get_block_type();
+    FileWindow get_file_window();
+    Option *get_option_by_code(uint16_t code);
+ private:
+    BlockHeader *bh = NULL;    // 8 Byte Header Object
+    void *block_buf = NULL;    // Actual Block Header of specific type
+    uint8_t *data_buf = NULL;  // Raw data buf, stripped of padding
+    struct FileWindow fw;
+    std::vector<Option *> options;
 };
 
 
-#endif
+#endif  // INCLUDE_PCAPNG_BLOCK_HPP_

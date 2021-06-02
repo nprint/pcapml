@@ -9,9 +9,8 @@
 
 int DirLabeler::label_dir(std::string dir, std::string label_file,
                           std::string outfile) {
-    
-    w.open_file((char *) outfile.c_str()); 
-    
+    w.open_file((char *) outfile.c_str());
+
     load_labels(label_file);
     process_directory(dir, outfile);
 
@@ -26,15 +25,16 @@ int DirLabeler::load_labels(std::string label_file) {
     std::vector<std::string> tokens;
 
     std::ifstream instream(label_file);
-    while(getline(instream, line)) {
+    while (getline(instream, line)) {
         tokenize_string(line, tokens, ',');
         tsize = tokens.size();
-        if(tokens[0][0] == '#') continue;
-        if(tsize != 2) {
+        if (tokens[0][0] == '#') continue;
+        if (tsize != 2) {
             printf("wrong number of tokens on line: %s\n", line.c_str());
             continue;
         }
-        labels.insert(make_pair(tokens[DIR_LABEL_FILE_LOC], tokens[DIR_LABEL_LABEL_LOC]));
+        labels.insert(make_pair(tokens[DIR_LABEL_FILE_LOC],
+                      tokens[DIR_LABEL_LABEL_LOC]));
     }
 
     return 0;
@@ -51,60 +51,60 @@ int DirLabeler::process_directory(std::string dir, std::string outfile) {
 
 
     d = opendir(dir.c_str());
-    if(d == NULL) {
+    if (d == NULL) {
         fprintf(stderr, "Error opening directory: %s\n", dir.c_str());
         return 1;
     }
 
-    for(de = readdir(d); de != NULL; de = readdir(d)) {
-        if(dir[dir.size() - 1] == '/') {
+    for (de = readdir(d); de != NULL; de = readdir(d)) {
+        if (dir[dir.size() - 1] == '/') {
             sprintf(full_name, "%s%s", dir.c_str(), de->d_name);
-        }
-        else {
+        } else {
             sprintf(full_name, "%s/%s", dir.c_str(), de->d_name);
         }
         exists = stat(full_name, &buf);
-        if(exists < 0) {
+        if (exists < 0) {
             fprintf(stderr, "Error stating: %s\n", full_name);
             continue;
         }
 
         /* Check if file is in our labels, if so process it */
         mit = labels.find(full_name);
-        if(mit != labels.end()) {
+        if (mit != labels.end()) {
             sid = get_sid(mit->first, mit->second);
             label_file(full_name, sid, mit->second, outfile);
         }
 
         /* Recursively traverse directories */
-        if(S_ISDIR(buf.st_mode) && strcmp(de->d_name, ".") != 0 && strcmp(de->d_name, "..") != 0) {
+        if (S_ISDIR(buf.st_mode) && strcmp(de->d_name, ".") != 0 && strcmp(de->d_name, "..") != 0) {
             process_directory(std::string(full_name), outfile);
         }
     }
-    
+
     closedir(d);
-    
+
     return 0;
 }
 
-int DirLabeler::label_file(char *f, std::string sid, std::string label, std::string outfile) {
+int DirLabeler::label_file(char *f, std::string sid, std::string label,
+                           std::string outfile) {
     PcapReader r;
     std::string comment;
     pcap_packet_info *pi;
 
     r.open_file(f);
     comment = sid + "," + label;
-    
-    while(1) {
+
+    while (1) {
         pi = r.get_next_packet();
-        if(pi == NULL) {
+        if (pi == NULL) {
             break;
         }
         w.write_epb_from_pcap_pkt(pi, comment);
         delete pi;
     }
     r.close_file();
-    
+
     return 0;
 }
 
@@ -118,12 +118,11 @@ std::string DirLabeler::get_sid(std::string infile, std::string label) {
 
     /* Add to global list */
     sit = sids.find(sid);
-    if(sit != sids.end()) {
+    if (sit != sids.end()) {
         // TODO loop if collision
         fprintf(stderr, "Hashed SID collision: file: %s, need to fix\n", infile.c_str());
         exit(1);
-    }
-    else {
+    } else {
         sids.insert(sid);
     }
 

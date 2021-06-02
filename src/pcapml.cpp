@@ -5,8 +5,9 @@
  * of the License at https://www.apache.org/licenses/LICENSE-2.0
  */
 
-#include <string>
 #include <argp.h>
+
+#include <string>
 
 #include "dir.hpp"
 #include "labeler.hpp"
@@ -25,15 +26,14 @@ static struct argp_option options[] = {
     {"sort", 's', 0, 0, "sort pcapng by sampleid -> time"},
     {0}};
 
-struct arguments
-{
-    bool sort=false;
-    char *infile=NULL;
-    char *outfile=NULL;
-    char *labels=NULL;
-    char *file_dir=NULL;
+struct arguments {
+    bool sort = false;
+    char *infile = NULL;
+    char *outfile = NULL;
+    char *labels = NULL;
+    char *file_dir = NULL;
 };
-     
+
 static error_t parse_opt(int key, char *arg, struct argp_state *state) {
     struct arguments *arguments = (struct arguments *) state->input;
     switch (key) {
@@ -66,38 +66,40 @@ int main(int argc, char **argv) {
     struct arguments arguments;
     /* parse args */
     argp_parse(&argp, argc, argv, 0, 0, &arguments);
-    
+
     DirLabeler d;
     Sorter sorter;
     PcapMLLabeler labeler;
 
-    if(arguments.outfile == NULL) {
+    if (arguments.outfile == NULL) {
         printf("No output file, exiting\n");
         exit(1);
     }
 
-    if(arguments.file_dir != NULL && arguments.labels != NULL) {
+    if (arguments.file_dir != NULL && arguments.labels != NULL) {
         printf("Labeling directory: %s\n", arguments.file_dir);
-        d.label_dir(std::string(arguments.file_dir), std::string(arguments.labels), std::string(arguments.outfile)); 
+        d.label_dir(std::string(arguments.file_dir),
+                    std::string(arguments.labels),
+                    std::string(arguments.outfile));
     }
 
-    if(arguments.infile != NULL && arguments.labels != NULL) {
+    if (arguments.infile != NULL && arguments.labels != NULL) {
         printf("Labeling PCAP: %s\n", arguments.infile);
         printf("Loading labels...\n");
         rv = labeler.load_labels(arguments.labels);
-        if(rv == false) {
+        if (rv == false) {
             printf("Error loading labels, exiting\n");
             exit(1);
         }
         rv = labeler.label_pcap(arguments.infile, arguments.outfile);
-        if(rv == false) {
+        if (rv == false) {
             printf("Failure while parsing pcap\n");
             exit(1);
         }
     }
-    
+
     /* TODO use tmp file so that we can label & sort in 1 cmd */
-    if(arguments.sort == true) {
+    if (arguments.sort == true) {
         printf("Sorting pcapml\n");
         sorter.sort_pcapng(arguments.infile, arguments.outfile);
     }
