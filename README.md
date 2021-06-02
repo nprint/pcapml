@@ -61,7 +61,7 @@ frame.comment
 14792257769479651673,google
 ```
 
-Any arbitrary grouping of packets can be named, enabling us to group packets by application, flows, device, attacks, or any other common traffic analysis task. We also note that this _sampleID_ enables easy benchmarking for popular datasets: the only information that needs to be published is the dataset and a list of training, testing, and challenge _sampleIDs_ for users with different methods to compare with each other.
+Any arbitrary grouping of packets can be used, enabling us to group packets by application, flows, device, attacks, or any other common traffic analysis task. We also note that this _sampleID_ enables easy benchmarking for popular datasets: the only information that needs to be published is the dataset and a list of training, testing, and challenge _sampleIDs_ for users with different methods to compare with each other.
 
 ## Analysis
 
