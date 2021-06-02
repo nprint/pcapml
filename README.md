@@ -65,7 +65,7 @@ Any arbitrary grouping of packets can be used, enabling us to group packets by a
 
 ## Analysis
 
-`pcapml` output can be read by tools such as `tshark` or `tcpudmp`. We realize that the crux of traffic analysis tasks involves extracting identifying information from traffic samples. pcapml's standardized output format allows us to focus on extracting features by exposing a python iterator to pcapml labeled datasets. `pypcapml` removes the barrier to entry for traffic analysis tasks, enabling a) users to focus on methods for information extraction b) write one feature extraction method for multiple datasets and c) create more reproducable pipelines for future work to comapre with. An example of using `pypcapml` is below:
+Although `pcapml` output can be read by tools such as `tshark` or `tcpudmp`, we realize that the crux of traffic analysis tasks involves extracting identifying information from traffic samples. pcapml's standardized output format allows us to focus on extracting features by exposing a python iterator to pcapml labeled datasets. `pypcapml` removes the barrier to entry for traffic analysis tasks, enabling a) users to focus on methods for information extraction b) write one feature extraction method for multiple datasets and c) create more reproducable pipelines for future work to comapre with. An example of using `pypcapml` is below:
 
 ```python
 import argparse
