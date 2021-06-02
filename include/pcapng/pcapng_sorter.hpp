@@ -20,7 +20,7 @@ struct PacketSortInfo {
     uint64_t ts;
     FileWindow fw;
 
-    bool operator<(const PacketSortInfo &rhs) {
+    bool operator<(const PacketSortInfo &rhs) const {
         if (rhs.sid == sid) {
             return rhs.ts < ts;
         } else {
