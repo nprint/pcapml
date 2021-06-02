@@ -1,0 +1,10 @@
+mac-os,host 192.168.10.25
+ubuntu-14.4,host 192.168.10.19
+ubuntu-16.4,host 192.168.10.16
+ubuntu-server,host 192.168.10.51
+windows-vista,host 192.168.10.8
+web-server,host 192.168.10.50
+windows-10,host 192.168.10.15
+windows-10-pro,host 192.168.10.14
+windows-7-pro,host 192.168.10.9
+windows-8.1,host 192.168.10.5
