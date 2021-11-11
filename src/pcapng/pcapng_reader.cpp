@@ -52,10 +52,6 @@ Block *PcapNGReader::read_block() {
     BlockHeader *bh;
     Block *b;
 
-    if (feof(f)) {
-        return NULL;
-    }
-
     /* Keep track of file location and block bytes we've read */
     block_bytes_read = 0;
     cur_block_start = ftell(f);
@@ -63,6 +59,11 @@ Block *PcapNGReader::read_block() {
     /* Read header of block as its always the same and tells us what to do */
     bh = new BlockHeader;
     read_and_update((void *) bh, sizeof(BlockHeader));
+    
+    if (feof(f)) {
+        return NULL;
+    }
+
 
     /* Check if block is jank */
     if (bh->length == 0) {
