@@ -22,7 +22,7 @@ void Block::print(FILE *stream) {
         fprintf(stream, "    length: NULL\n");
     } else {
         fprintf(stream, "    type:   %u\n", bh->type);
-        fprintf(stream, "    type:   %u\n", bh->length);
+        fprintf(stream, "    length:   %u\n", bh->length);
     }
     fprintf(stream, "  }\n");
     fprintf(stream, "  FileWindow {\n");
