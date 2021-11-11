@@ -16,7 +16,7 @@
 #define BIG_END 0
 #define LITTLE_END 1
 
-#define BUF_SIZE 8192
+#define BUF_SIZE 8192*2
 #define COMMENT_MAX 4096
 
 #define TRAILER_LEN 4
