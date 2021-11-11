@@ -97,6 +97,7 @@ Block *PcapNGReader::read_block() {
 void PcapNGReader::read_unknown(Block *b) {
     fprintf(stderr, "Unknown block type, printing block and exiting\n");
     b->print(stderr);
+    print_state();
     exit(3);
 }
 
