@@ -15,7 +15,7 @@
 #include "sorter_pcapng.hpp"
 #include "splitter_pcapng.hpp"
 
-const char *argp_program_version = "pcapml 0.0.1";
+const char *argp_program_version = "pcapml 0.1.0";
 const char *argp_program_bug_address = "https://github.com/nprint/pcapml";
 static char doc[] = "None";
 static char args_doc[] = "";
