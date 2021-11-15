@@ -5,8 +5,8 @@
  * of the License at https://www.apache.org/licenses/LICENSE-2.0
  */
 
-#ifndef INCLUDE_PCAPNG_BLOCK_HPP_
-#define INCLUDE_PCAPNG_BLOCK_HPP_
+#ifndef INCLUDE_PCAPNG_BLOCK_PCAPNG_HPP_
+#define INCLUDE_PCAPNG_BLOCK_PCAPNG_HPP_
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -102,4 +102,4 @@ class Block {
 };
 
 
-#endif  // INCLUDE_PCAPNG_BLOCK_HPP_
+#endif  // INCLUDE_PCAPNG_BLOCK_PCAPNG_HPP_

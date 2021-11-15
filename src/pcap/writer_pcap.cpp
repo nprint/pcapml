@@ -5,7 +5,7 @@
  * of the License at https://www.apache.org/licenses/LICENSE-2.0
  */
 
-#include "pcap_writer.hpp"
+#include "writer_pcap.hpp"
 
 int PcapWriter::open_file(char *outfile) {
     pd = pcap_open_dead(DLT_EN10MB, 65535 /* snaplen */);
@@ -21,5 +21,5 @@ int PcapWriter::write_packet(pcap_pkthdr *hdr, uint8_t *buf) {
 }
 
 void PcapWriter::close_file() {
-    if(pd != NULL) pcap_close(pd);
+    if (pd != NULL) pcap_close(pd);
 }

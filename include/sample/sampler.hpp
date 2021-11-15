@@ -8,9 +8,9 @@
 #ifndef INCLUDE_SAMPLE_SAMPLER_HPP_
 #define INCLUDE_SAMPLE_SAMPLER_HPP_
 
-#include "block.hpp"
 #include "sample.hpp"
-#include "pcapng_reader.hpp"
+#include "block_pcapng.hpp"
+#include "reader_pcapng.hpp"
 
 class Sampler : public PcapNGReader {
  public:

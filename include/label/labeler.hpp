@@ -13,8 +13,8 @@
 
 #include "util.hpp"
 #include "label.hpp"
-#include "pcap_reader.hpp"
-#include "pcapng_writer.hpp"
+#include "reader_pcap.hpp"
+#include "writer_pcapng.hpp"
 
 #define LABEL_FILE_LOC  0
 #define FILTER_LOC 1

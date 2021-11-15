@@ -5,15 +5,15 @@
  * of the License at https://www.apache.org/licenses/LICENSE-2.0
  */
 
-#ifndef INCLUDE_PCAPNG_PCAPNG_SORTER_HPP_
-#define INCLUDE_PCAPNG_PCAPNG_SORTER_HPP_
+#ifndef INCLUDE_PCAPNG_SORTER_PCAPNG_HPP_
+#define INCLUDE_PCAPNG_SORTER_PCAPNG_HPP_
 
 #include <vector>
 #include <algorithm>
 
 #include "util.hpp"
-#include "block.hpp"
-#include "pcapng_reader.hpp"
+#include "block_pcapng.hpp"
+#include "reader_pcapng.hpp"
 
 struct PacketSortInfo {
     size_t sid;
@@ -42,4 +42,4 @@ class Sorter : public PcapNGReader {
     std::vector<PacketSortInfo> pkt_blocks;
 };
 
-#endif  // INCLUDE_PCAPNG_PCAPNG_SORTER_HPP_
+#endif  // INCLUDE_PCAPNG_SORTER_PCAPNG_HPP_
