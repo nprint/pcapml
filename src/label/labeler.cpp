@@ -82,6 +82,7 @@ bool PcapMLLabeler::label_pcap(char *infile, char *outfile) {
         }
         total++;
     }
+    w.close_file();
 
     return true;
 }

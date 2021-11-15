@@ -13,25 +13,30 @@
 #include "labeler.hpp"
 #include "pcapng_reader.hpp"
 #include "pcapng_sorter.hpp"
+#include "pcapng_splitter.hpp"
 
 const char *argp_program_version = "pcapml 0.0.1";
 const char *argp_program_bug_address = "https://github.com/nprint/pcapml";
 static char doc[] = "None";
 static char args_doc[] = "";
 static struct argp_option options[] = {
-    {"infile", 'P', "FILE", 0, "pcap to label"},
+    {"pcap", 'P', "FILE", 0, "pcap to label"},
     {"outfile", 'W', "FILE", 0, "outfile (pcapng)"},
     {"file_dir", 'D', "FILE", 0, "directory of pcaps to label"},
+    {"pcapml", 'M', "FILE", 0, "pcapml to split"},
+    {"outdir", 'O', "FILE", 0, "output directory for split pcaps"},
     {"label_file", 'L', "FILE", 0, "labels for packets"},
     {"sort", 's', 0, 0, "sort pcapng by sampleid -> time"},
     {0}};
 
 struct arguments {
     bool sort = false;
-    char *infile = NULL;
+    char *pcap = NULL;
     char *outfile = NULL;
     char *labels = NULL;
     char *file_dir = NULL;
+    char *pcapml = NULL;
+    char *outdir = NULL;
 };
 
 static error_t parse_opt(int key, char *arg, struct argp_state *state) {
@@ -39,7 +44,7 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state) {
     switch (key) {
         break;
     case 'P':
-        arguments->infile = arg;
+        arguments->pcap = arg;
         break;
     case 'W':
         arguments->outfile = arg;
@@ -49,6 +54,12 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state) {
         break;
     case 'L':
         arguments->labels = arg;
+        break;
+    case 'O':
+        arguments->outdir = arg;
+        break;
+    case 'M':
+        arguments->pcapml = arg;
         break;
     case 's':
         arguments->sort = true;
@@ -69,10 +80,11 @@ int main(int argc, char **argv) {
 
     DirLabeler d;
     Sorter sorter;
+    Splitter splitter;
     PcapMLLabeler labeler;
 
-    if (arguments.outfile == NULL) {
-        printf("No output file, exiting\n");
+    if (arguments.outfile == NULL && arguments.outdir == NULL) {
+        printf("No output configuration, exiting\n");
         exit(1);
     }
 
@@ -83,15 +95,15 @@ int main(int argc, char **argv) {
                     std::string(arguments.outfile));
     }
 
-    if (arguments.infile != NULL && arguments.labels != NULL) {
-        printf("Labeling PCAP: %s\n", arguments.infile);
+    if (arguments.pcap != NULL && arguments.labels != NULL) {
+        printf("Labeling PCAP: %s\n", arguments.pcap);
         printf("Loading labels...\n");
         rv = labeler.load_labels(arguments.labels);
         if (rv == false) {
             printf("Error loading labels, exiting\n");
             exit(1);
         }
-        rv = labeler.label_pcap(arguments.infile, arguments.outfile);
+        rv = labeler.label_pcap(arguments.pcap, arguments.outfile);
         if (rv == false) {
             printf("Failure while parsing pcap\n");
             exit(1);
@@ -99,9 +111,14 @@ int main(int argc, char **argv) {
     }
 
     /* TODO use tmp file so that we can label & sort in 1 cmd */
-    if (arguments.sort == true) {
+    if (arguments.sort == true && arguments.pcapml != NULL) {
         printf("Sorting pcapml\n");
-        sorter.sort_pcapng(arguments.infile, arguments.outfile);
+        sorter.sort_pcapng(arguments.pcapml, arguments.outfile);
+    }
+
+    if (arguments.pcapml != NULL && arguments.outdir != NULL) {
+        printf("Splitting pcapml\n");
+        splitter.split_pcapng(arguments.pcapml, arguments.outdir);
     }
 
     return 0;
