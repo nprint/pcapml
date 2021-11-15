@@ -11,9 +11,9 @@
 
 #include "dir.hpp"
 #include "labeler.hpp"
-#include "pcapng_reader.hpp"
-#include "pcapng_sorter.hpp"
-#include "pcapng_splitter.hpp"
+#include "reader_pcapng.hpp"
+#include "sorter_pcapng.hpp"
+#include "splitter_pcapng.hpp"
 
 const char *argp_program_version = "pcapml 0.0.1";
 const char *argp_program_bug_address = "https://github.com/nprint/pcapml";

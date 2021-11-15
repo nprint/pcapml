@@ -5,8 +5,8 @@
  * of the License at https://www.apache.org/licenses/LICENSE-2.0
  */
 
-#ifndef INCLUDE_PCAPNG_PCAPNG_WRITER_HPP_
-#define INCLUDE_PCAPNG_PCAPNG_WRITER_HPP_
+#ifndef INCLUDE_PCAPNG_WRITER_PCAPNG_HPP_
+#define INCLUDE_PCAPNG_WRITER_PCAPNG_HPP_
 
 #define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
 
@@ -34,7 +34,7 @@
 #include <exception>
 
 #include "util.hpp"
-#include "block.hpp"
+#include "block_pcapng.hpp"
 
 class PcapNGWriter {
  public:
@@ -54,4 +54,4 @@ class PcapNGWriter {
     int pad_packet(int pkt_len);
 };
 
-#endif  // INCLUDE_PCAPNG_PCAPNG_WRITER_HPP_
+#endif  // INCLUDE_PCAPNG_WRITER_PCAPNG_HPP_

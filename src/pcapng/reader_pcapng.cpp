@@ -5,7 +5,7 @@
  * of the License at https://www.apache.org/licenses/LICENSE-2.0
  */
 
-#include "pcapng_reader.hpp"
+#include "reader_pcapng.hpp"
 
 int PcapNGReader::open_pcapng(char *infile) {
     packets_processed = 0;

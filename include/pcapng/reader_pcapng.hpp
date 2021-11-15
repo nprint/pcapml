@@ -5,8 +5,8 @@
  * of the License at https://www.apache.org/licenses/LICENSE-2.0
  */
 
-#ifndef INCLUDE_PCAPNG_PCAPNG_READER_HPP_
-#define INCLUDE_PCAPNG_PCAPNG_READER_HPP_
+#ifndef INCLUDE_PCAPNG_READER_PCAPNG_HPP_
+#define INCLUDE_PCAPNG_READER_PCAPNG_HPP_
 
 #define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
 
@@ -36,7 +36,7 @@
 #include <algorithm>
 
 #include "util.hpp"
-#include "block.hpp"
+#include "block_pcapng.hpp"
 
 class PcapNGReader {
  public:
@@ -70,4 +70,4 @@ class PcapNGReader {
     void read_section_header(Block *b);
 };
 
-#endif  // INCLUDE_PCAPNG_PCAPNG_READER_HPP_
+#endif  // INCLUDE_PCAPNG_READER_PCAPNG_HPP_

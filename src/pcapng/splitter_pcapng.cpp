@@ -5,19 +5,18 @@
  * of the License at https://www.apache.org/licenses/LICENSE-2.0
  */
 
-#include "pcapng_splitter.hpp"
+#include "splitter_pcapng.hpp"
 
 bool Splitter::process_block(Block *b, void *p) {
     uint32_t block_type;
 
     block_type = b->get_block_type();
-    if(block_type == INTERFACE_HEADER) {
+    if (block_type == INTERFACE_HEADER) {
         process_idb(b);
-    }
-    else if (block_type == ENHANCED_PKT_HEADER) {
+    } else if (block_type == ENHANCED_PKT_HEADER) {
         process_packet_block(b);
     }
-    
+
     return true;
 }
 
@@ -42,7 +41,7 @@ bool Splitter::process_packet_block(Block *b) {
      * TODO at some point we will most likely want to make this a faster
      * comparison i.e. integer 
     */
-    if(tokens[COMMENT_SID_LOC].compare(cur_sid) != 0) {
+    if (tokens[COMMENT_SID_LOC].compare(cur_sid) != 0) {
         /* Update IO */
         w.close_file();
         cur_sid = tokens[COMMENT_SID_LOC];
@@ -52,13 +51,13 @@ bool Splitter::process_packet_block(Block *b) {
         outfile = outdir + outfile;
         w.open_file((char *) outfile.c_str());
     }
-    
+
     /* update pcap packet header with pcapng block info */
     pcap_header = new pcap_pkthdr;
     epb = (EnhancedPacketBlock *) b->get_block_buf();
     pcap_header->len = epb->og_len;
     pcap_header->caplen = epb->cap_len;
-    
+
     /* re-convert time from pcapng to pcap and update header */
     time.tv_sec = epb->ts_high;
     time.tv_usec = epb->ts_low;
@@ -68,16 +67,6 @@ bool Splitter::process_packet_block(Block *b) {
 
     delete pcap_header;
 
-    return true;
-}
-
-
-bool Splitter::update_io(std::vector<std::string> &tokens) {
-    std::string outfile;
-
-    //printf("opening file\n");
-    //w.open_file((char *) outfile.c_str());
-    
     return true;
 }
 
@@ -106,7 +95,7 @@ int Splitter::split_pcapng(char *infile, char *outdir) {
         process_block(b, NULL);
         delete b;
     }
-    
+
 
     fclose(mdf);
     close_pcapng();
@@ -115,11 +104,11 @@ int Splitter::split_pcapng(char *infile, char *outdir) {
 
 void Splitter::recursive_mkdir(char *path) {
     char *sep;
-    
+
     sep = strrchr(path, '/');
     if (sep != NULL) {
         *sep = 0;
-        if(strcmp(path, "") != 0) recursive_mkdir(path);
+        if (strcmp(path, "") != 0) recursive_mkdir(path);
         *sep = '/';
     }
     if (mkdir(path, 0777) && errno != EEXIST) {

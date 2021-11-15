@@ -5,7 +5,7 @@
  * of the License at https://www.apache.org/licenses/LICENSE-2.0
  */
 
-#include "block.hpp"
+#include "block_pcapng.hpp"
 
 Block::Block(BlockHeader *bh, uint64_t f_start) {
     this->bh = bh;

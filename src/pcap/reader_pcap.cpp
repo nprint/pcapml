@@ -5,7 +5,7 @@
  * of the License at https://www.apache.org/licenses/LICENSE-2.0
  */
 
-#include "pcap_reader.hpp"
+#include "reader_pcap.hpp"
 
 int PcapReader::open_file(char *infile) {
     char errbuf[PCAP_ERRBUF_SIZE];

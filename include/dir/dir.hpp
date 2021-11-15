@@ -24,10 +24,9 @@
 #include <string>
 #include <fstream>
 
-
-#include "pcap_reader.hpp"
-#include "pcapng_writer.hpp"
 #include "util.hpp"
+#include "reader_pcap.hpp"
+#include "writer_pcapng.hpp"
 
 class DirLabeler {
  public:

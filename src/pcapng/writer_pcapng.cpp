@@ -5,7 +5,7 @@
  * of the License at https://www.apache.org/licenses/LICENSE-2.0
  */
 
-#include "pcapng_writer.hpp"
+#include "writer_pcapng.hpp"
 
 int PcapNGWriter::open_file(char *f, bool append) {
     if (!(check_file_exists(f))) {

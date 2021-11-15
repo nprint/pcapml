@@ -5,7 +5,7 @@
  * of the License at https://www.apache.org/licenses/LICENSE-2.0
  */
 
-#include "pcapng_sorter.hpp"
+#include "sorter_pcapng.hpp"
 
 bool Sorter::process_block(Block *b, void *p) {
     uint32_t block_type;
