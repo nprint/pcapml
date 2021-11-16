@@ -96,13 +96,13 @@ int main(int argc, char **argv) {
     }
 
     if (arguments.pcap != NULL && arguments.labels != NULL) {
-        printf("Labeling PCAP: %s\n", arguments.pcap);
         printf("Loading labels...\n");
         rv = labeler.load_labels(arguments.labels);
         if (rv == false) {
             printf("Error loading labels, exiting\n");
             exit(1);
         }
+        printf("Labeling PCAP: %s\n", arguments.pcap);
         rv = labeler.label_pcap(arguments.pcap, arguments.outfile);
         if (rv == false) {
             printf("Failure while parsing pcap\n");
@@ -118,7 +118,11 @@ int main(int argc, char **argv) {
 
     if (arguments.pcapml != NULL && arguments.outdir != NULL) {
         printf("Splitting pcapml\n");
-        splitter.split_pcapng(arguments.pcapml, arguments.outdir);
+        rv = splitter.split_pcapng(arguments.pcapml, arguments.outdir);
+        if (rv != 0) {
+            printf("Error while splitting pcapml file\n");
+            exit(3);
+        }
     }
 
     return 0;

@@ -35,3 +35,7 @@ pcap_packet_info *PcapReader::get_next_packet() {
 
     return pi;
 }
+
+uint16_t PcapReader::get_linktype() {
+    return pcap_datalink(f);
+}

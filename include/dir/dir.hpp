@@ -33,6 +33,8 @@ class DirLabeler {
     int label_dir(std::string dir, std::string label_file,
                       std::string outfile);
  private:
+    uint32_t samples_processed = 0;
+    int16_t cur_linktype = 999;
     PcapNGWriter w;
     std::string get_sid(std::string infile, std::string label);
     int label_file(char *f, std::string sid, std::string label,

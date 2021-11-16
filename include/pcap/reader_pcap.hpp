@@ -24,9 +24,10 @@ class PcapReader {
     void close_file();
     int open_file(char *infile);
     pcap_packet_info *get_next_packet();
+    uint16_t get_linktype(); 
+
  private:
     pcap_t *f;
-    
     pcap_t *get_pcap_handle();
 };
 

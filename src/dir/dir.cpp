@@ -49,7 +49,6 @@ int DirLabeler::process_directory(std::string dir, std::string outfile) {
     std::string sid;
     std::map<std::string, std::string>::iterator mit;
 
-
     d = opendir(dir.c_str());
     if (d == NULL) {
         fprintf(stderr, "Error opening directory: %s\n", dir.c_str());
@@ -80,7 +79,8 @@ int DirLabeler::process_directory(std::string dir, std::string outfile) {
             process_directory(std::string(full_name), outfile);
         }
     }
-
+    
+    printf("Closing directory\n");
     closedir(d);
 
     return 0;
@@ -89,12 +89,18 @@ int DirLabeler::process_directory(std::string dir, std::string outfile) {
 int DirLabeler::label_file(char *f, std::string sid, std::string label,
                            std::string outfile) {
     PcapReader r;
+    uint16_t linktype;
     std::string comment;
     pcap_packet_info *pi;
 
     r.open_file(f);
-    comment = sid + "," + label;
+    linktype = r.get_linktype();
+    if (linktype != cur_linktype) {
+        w.write_interface_block(linktype, 0); 
+        cur_linktype = linktype;
+    }
 
+    comment = sid + "," + label;
     while (1) {
         pi = r.get_next_packet();
         if (pi == NULL) {
@@ -104,6 +110,7 @@ int DirLabeler::label_file(char *f, std::string sid, std::string label,
         delete pi;
     }
     r.close_file();
+    samples_processed += 1;
 
     return 0;
 }

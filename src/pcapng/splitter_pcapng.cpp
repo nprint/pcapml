@@ -16,11 +16,19 @@ bool Splitter::process_block(Block *b, void *p) {
     } else if (block_type == ENHANCED_PKT_HEADER) {
         process_packet_block(b);
     }
+    else {
+        printf("Unrecognized block, this could be a problem\n");
+    }
 
     return true;
 }
 
 bool Splitter::process_idb(Block *b) {
+    InterfaceDescription *idb;
+
+    idb = (InterfaceDescription *) b->get_block_buf();
+    cur_linktype = idb->link_type;
+
     return true;
 }
 
@@ -42,6 +50,7 @@ bool Splitter::process_packet_block(Block *b) {
      * comparison i.e. integer 
     */
     if (tokens[COMMENT_SID_LOC].compare(cur_sid) != 0) {
+        samples_processed += 1;
         /* Update IO */
         w.close_file();
         cur_sid = tokens[COMMENT_SID_LOC];
@@ -49,7 +58,7 @@ bool Splitter::process_packet_block(Block *b) {
         outfile = cur_sid + '_' + cur_metadata + ".pcap";
         fprintf(mdf, "%s,%s\n", outfile.c_str(), tokens[COMMENT_LABEL_LOC].c_str());
         outfile = outdir + outfile;
-        w.open_file((char *) outfile.c_str());
+        w.open_file((char *) outfile.c_str(), cur_linktype);
     }
 
     /* update pcap packet header with pcapng block info */
@@ -86,7 +95,8 @@ int Splitter::split_pcapng(char *infile, char *outdir) {
     if (rv != 0) {
         return 1;
     }
-
+    
+    printf("Splitting pcapng");
     while (1) {
         b = read_block();
         if (b == NULL) {

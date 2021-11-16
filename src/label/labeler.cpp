@@ -35,7 +35,7 @@ bool PcapMLLabeler::load_labels(char *label_file) {
 
         l = new Label();
         rv = l->set_info(label, bpf_filter, ts_start, ts_end);
-        if (!(rv)) {
+        if(!(rv)) {
             printf("failure creating label instance for line: %s\n", line.c_str());
             delete l;
             continue;
@@ -52,6 +52,7 @@ bool PcapMLLabeler::load_labels(char *label_file) {
 }
 
 bool PcapMLLabeler::label_pcap(char *infile, char *outfile) {
+    uint16_t linktype;
     uint64_t matched, total;
     std::vector<Label *>::iterator vit;
     PcapNGWriter w;
@@ -62,9 +63,12 @@ bool PcapMLLabeler::label_pcap(char *infile, char *outfile) {
         printf("Cowardly refusing to label pcap without any labels loaded\n");
         return false;
     }
-
+    /* IO */
     r.open_file(infile);
+    linktype = r.get_linktype();
     w.open_file(outfile);
+    w.write_interface_block(linktype, 0); 
+
     total = 0;
     matched = 0;
     while (1) {
