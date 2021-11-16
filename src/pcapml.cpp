@@ -15,9 +15,9 @@
 #include "sorter_pcapng.hpp"
 #include "splitter_pcapng.hpp"
 
-const char *argp_program_version = "pcapml 0.1.0";
+const char *argp_program_version = "pcapml 0.2.0";
 const char *argp_program_bug_address = "https://github.com/nprint/pcapml";
-static char doc[] = "None";
+static char doc[] = "pcapML standardzies the interactions with traffic analysis datasets";
 static char args_doc[] = "";
 static struct argp_option options[] = {
     {"pcap", 'P', "FILE", 0, "pcap to label"},
