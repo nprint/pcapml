@@ -117,7 +117,6 @@ int main(int argc, char **argv) {
     }
 
     if (arguments.pcapml != NULL && arguments.outdir != NULL) {
-        printf("Splitting pcapml\n");
         rv = splitter.split_pcapng(arguments.pcapml, arguments.outdir);
         if (rv != 0) {
             printf("Error while splitting pcapml file\n");

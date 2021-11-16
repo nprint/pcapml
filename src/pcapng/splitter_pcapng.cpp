@@ -11,12 +11,12 @@ bool Splitter::process_block(Block *b, void *p) {
     uint32_t block_type;
 
     block_type = b->get_block_type();
-    if (block_type == INTERFACE_HEADER) {
+    if (block_type == SECTION_HEADER) {
+    } else if (block_type == INTERFACE_HEADER) {
         process_idb(b);
     } else if (block_type == ENHANCED_PKT_HEADER) {
         process_packet_block(b);
-    }
-    else {
+    } else {
         printf("Unrecognized block, this could be a problem\n");
     }
 
@@ -84,7 +84,7 @@ int Splitter::split_pcapng(char *infile, char *outdir) {
     Block *b;
 
     /* Make output directory */
-    printf("making output directory\n");
+    printf("Making output directory\n");
     this->outdir = outdir;
     recursive_mkdir(outdir);
 
@@ -95,8 +95,8 @@ int Splitter::split_pcapng(char *infile, char *outdir) {
     if (rv != 0) {
         return 1;
     }
-    
-    printf("Splitting pcapng");
+
+    printf("Splitting pcapng\n");
     while (1) {
         b = read_block();
         if (b == NULL) {
