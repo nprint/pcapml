@@ -80,7 +80,6 @@ int DirLabeler::process_directory(std::string dir, std::string outfile) {
         }
     }
     
-    printf("Closing directory\n");
     closedir(d);
 
     return 0;
