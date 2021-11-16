@@ -7,8 +7,8 @@
 
 #include "writer_pcap.hpp"
 
-int PcapWriter::open_file(char *outfile) {
-    pd = pcap_open_dead(DLT_EN10MB, 65535 /* snaplen */);
+int PcapWriter::open_file(char *outfile, uint16_t linktype) {
+    pd = pcap_open_dead(linktype, 65535 /* snaplen */);
     t = pcap_dump_open(pd, outfile);
 
     return 0;

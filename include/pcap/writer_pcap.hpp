@@ -22,7 +22,7 @@
 class PcapWriter {
  public:
     void close_file();
-    int open_file(char *outfile);
+    int open_file(char *outfile, uint16_t linktype);
     int write_packet(pcap_pkthdr *hdr, uint8_t *buf);
  private:
     pcap_t *pd = NULL;

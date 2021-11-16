@@ -24,7 +24,6 @@ int PcapNGWriter::open_file(char *f, bool append) {
     DEBUG_PRINT(("pcapng opened for writing\n"));
 
     write_section_block();
-    write_interface_block(1, 0);
 
     return 0;
 }

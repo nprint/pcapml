@@ -20,6 +20,8 @@ class Splitter : public PcapNGReader {
     bool process_block(Block *b, void *p);
     int split_pcapng(char *infile, char *outdir);
  private:
+    uint16_t cur_linktype = 999;
+    uint16_t samples_processed = 0;
     PcapWriter w;
     std::string outdir;
     std::string cur_sid = "";
