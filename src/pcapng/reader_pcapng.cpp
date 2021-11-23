@@ -55,6 +55,8 @@ Block *PcapNGReader::read_block() {
     /* Keep track of file location and block bytes we've read */
     block_bytes_read = 0;
     cur_block_start = ftell(f);
+    
+    fflush(stdout);
 
     /* Read header of block as its always the same and tells us what to do */
     bh = new BlockHeader;
@@ -63,7 +65,6 @@ Block *PcapNGReader::read_block() {
     if (feof(f)) {
         return NULL;
     }
-
 
     /* Check if block is jank */
     if (bh->length == 0) {
@@ -120,12 +121,12 @@ void PcapNGReader::read_eph(Block *b) {
     /* Consume Packet data */
     /* TODO handle jumbos in a while loop */
     chunk_size_to_read = MIN(epb->cap_len, BUF_SIZE);
-    pkt_bytes_read += chunk_size_to_read;
     DEBUG_PRINT(("         Consuming: %d bytes of %d left\n", chunk_size_to_read, epb->cap_len - pkt_bytes_read));
     buf = new uint8_t[chunk_size_to_read];
     b->set_data_buf(buf);
 
     read_and_update((void *) buf, chunk_size_to_read);
+    pkt_bytes_read += chunk_size_to_read;
 
     /* Skip rest of packet for now, need to loop here to save big ones */
     if (chunk_size_to_read < epb->cap_len) {
@@ -142,7 +143,7 @@ void PcapNGReader::read_eph(Block *b) {
     if (b->get_block_length() - block_bytes_read > TRAILER_LEN) {
        read_options(b);
     }
-    //
+
     /* End of block length read */
     eob_read = b->get_block_length() - block_bytes_read;
     seek_and_update(eob_read);
