@@ -2,7 +2,6 @@ AUTOMAKE_OPTIONS = subdir-objects
 
 bin_PROGRAMS = pcapml
 
-
 pcapml_SOURCES = include/dir/dir.hpp include/label/label.hpp include/label/labeler.hpp \
 				 include/pcap/reader_pcap.hpp include/pcap/writer_pcap.hpp \
 				 include/pcapng/block_pcapng.hpp include/pcapng/reader_pcapng.hpp \
