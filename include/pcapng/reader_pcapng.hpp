@@ -50,9 +50,8 @@ class PcapNGReader {
     FILE *f;
     uint8_t sec_e;
     uint8_t sys_e;
-    uint32_t packets_processed;
-    uint8_t dump_buf[BUF_SIZE];
     uint32_t block_bytes_read;
+    uint32_t packets_processed;
     uint64_t total_bytes_read = 0;
 
     void print_state();

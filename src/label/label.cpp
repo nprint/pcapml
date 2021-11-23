@@ -75,7 +75,7 @@ bool Label::match_packet(pcap_packet_info *pi) {
 void Label::print() {
     printf("Label {\n");
     printf("  bpf:    %s\n",  bpf_string_filter.c_str());
-    printf("  tstart: %lu\n", ts_start);
-    printf("  tend:   %lu\n", ts_end);
+    printf("  tstart: %llu\n", ts_start);
+    printf("  tend:   %llu\n", ts_end);
     printf("}\n");
 }
