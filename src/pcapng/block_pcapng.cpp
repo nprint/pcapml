@@ -26,8 +26,8 @@ void Block::print(FILE *stream) {
     }
     fprintf(stream, "  }\n");
     fprintf(stream, "  FileWindow {\n");
-    fprintf(stream, "    start: %lu\n", fw.f_start);
-    fprintf(stream, "    end: %lu\n", fw.f_end);
+    fprintf(stream, "    start: %llu\n", fw.f_start);
+    fprintf(stream, "    end: %llu\n", fw.f_end);
     fprintf(stream, "  }\n");
     fprintf(stream, "}\n");
 }
