@@ -9,7 +9,14 @@
 
 int PcapWriter::open_file(char *outfile, uint16_t linktype) {
     pd = pcap_open_dead(linktype, 65535 /* snaplen */);
+    if(pd == NULL) {
+        return 1;
+    }
     t = pcap_dump_open(pd, outfile);
+    if(t == NULL) {
+        pcap_perror(pd, "Error oepning pcap dump: ");
+        return 1;
+    }
 
     return 0;
 }
@@ -22,4 +29,5 @@ int PcapWriter::write_packet(pcap_pkthdr *hdr, uint8_t *buf) {
 
 void PcapWriter::close_file() {
     if (pd != NULL) pcap_close(pd);
+    if(t != NULL) pcap_dump_close(t);
 }

@@ -33,6 +33,7 @@ bool Splitter::process_idb(Block *b) {
 }
 
 bool Splitter::process_packet_block(Block *b) {
+    int rv;
     struct timeval time;
     pcap_pkthdr *pcap_header;
     EnhancedPacketBlock *epb;
@@ -58,7 +59,8 @@ bool Splitter::process_packet_block(Block *b) {
         outfile = cur_sid + '_' + cur_metadata + ".pcap";
         fprintf(mdf, "%s,%s\n", outfile.c_str(), tokens[COMMENT_LABEL_LOC].c_str());
         outfile = outdir + outfile;
-        w.open_file((char *) outfile.c_str(), cur_linktype);
+        rv = w.open_file((char *) outfile.c_str(), cur_linktype);
+        if(rv != 0) return false;
     }
 
     /* update pcap packet header with pcapng block info */
