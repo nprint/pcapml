@@ -1,11 +1,11 @@
 blank_issues_enabled: true
 contact_links:
-  - name: 🗒️  nprintML README
-    url: https://github.com/nprint/nprintML#readme
-    about: Consult the nprintML README first.
-  - name: 📖 nprintML Usage Information
-    url: https://nprint.github.io/nprintml_walk.html
-    about: Learn more about how to use nprintML here.
-  - name: 📖 nPrint Usage Information
-    url: https://nprint.github.io/nprint_walk.html
-    about: Learn more about how to use nPrint here.
+  - name: 🗒️  pcapML README
+    url: https://github.com/nprint/pcapML#readme
+    about: Consult the pcapML README first.
+  - name: 📖 pcapML Usage Information
+    url: https://nprint.github.io/pcapml_walk.html
+    about: Learn more about how to use pcapML here.
+  - name: 📖 pypcapML Usage Information
+    url: https://nprint.github.io/pypcapml_walk.html
+    about: Learn more about how to use pypcapML here.
