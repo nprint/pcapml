@@ -22,7 +22,7 @@ Install dependencies on Mac OS: `brew install argp-standalone`
 
 ### Install
 
-1. Download the latest release tar here
+1. Download the latest release tar [here](https://github.com/nprint/pcapml/releases)
 
 2. Extract the tar `tar -xvf pcapml-[version].tar.gz`
 
