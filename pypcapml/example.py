@@ -1,6 +1,6 @@
 import argparse
 
-import pcapML
+import pcapml_FE
 
 def main():
     '''
@@ -12,7 +12,7 @@ def main():
     parser.add_argument('pcapml_dataset')
     args = parser.parse_args()
     
-    for traffic_sample in pcapML.sampler(args.pcapml_dataset):
+    for traffic_sample in pcapml_FE.sampler(args.pcapml_dataset):
         extract_info(traffic_sample)
 
 def extract_info(traffic_sample):
@@ -20,16 +20,14 @@ def extract_info(traffic_sample):
     Each sample contains the sampleID, metadata and a list of packets 
     with their associated timestamps
     '''
-    sid = traffic_sample[0][1]
-    metadata = traffic_sample[0][2]
-
-    print(sid, len(traffic_sample), metadata)
+ 
     '''
     iterating over the traffic sample (packets and timestamps)
     Assuming you've imported scapy as 'import scapy.all as scapy'
     you can transform to Scapy packets with 'scapy.Ether(pkt_buf)'
     '''
-    for idx, sid, label, ts, pkt_buf in traffic_sample:
+    for pkt in traffic_sample:
+        print(pkt)
         # Extract features
         pass
 
