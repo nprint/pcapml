@@ -1,4 +1,4 @@
-# pcapml
+# pcapML
 
 For a project overview, detailed usage information, and installation information please visit [pcapml's project homepage](https://nprint.github.io/pcapml.html)
 
