@@ -22,6 +22,24 @@ typedef struct {
     Sampler sampler;
 } SamplerState;
 
+static PyTypeObject PcapmlSampleType = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+static PyStructSequence_Field pcapml_sample_fields[] = {
+    {"index", "Index value"},
+    {"sid", "Sample ID"},
+    {"label", "Sample label"},
+    {"ts", "Packet timestamp"},
+    {"raw_bytes", "Packet bytes"},
+    {NULL}
+};
+
+static PyStructSequence_Desc pcapml_sample_desc = {
+    "pcapml.feature_explorer",
+    NULL,
+    pcapml_sample_fields,
+    5
+};
+
 static PyObject *
 sampler_new(PyTypeObject *type, PyObject *args, PyObject *kwargs)
 {
@@ -68,8 +86,19 @@ sampler_next(SamplerState *sstate)
 
             PyObject *resultlst = PyList_New(s->get_pkts().size());
 
+            PyTypeObject *PcapmlSampleType = PyStructSequence_NewType(&pcapml_sample_desc);
+            Py_INCREF(PcapmlSampleType);
+
             for (i = 0; i < s->get_pkts().size(); ++i) {
-                PyList_SET_ITEM(resultlst, i, Py_BuildValue("(iksky#)", sstate->enum_index, s->get_sid(), s->get_label().c_str(), s->get_pkt_ts()[i], s->get_pkts()[i], s->get_pkt_lens()[i]));
+
+                PyObject *PcapmlSample = PyStructSequence_New(PcapmlSampleType);
+                PyStructSequence_SET_ITEM(PcapmlSample, 0, Py_BuildValue("i", sstate->enum_index));
+                PyStructSequence_SET_ITEM(PcapmlSample, 1, Py_BuildValue("k", s->get_sid()));
+                PyStructSequence_SET_ITEM(PcapmlSample, 2, Py_BuildValue("s", s->get_label().c_str()));
+                PyStructSequence_SET_ITEM(PcapmlSample, 3, Py_BuildValue("k", s->get_pkt_ts()[i]));
+                PyStructSequence_SET_ITEM(PcapmlSample, 4, Py_BuildValue("y#", s->get_pkts()[i], s->get_pkt_lens()[i]));
+
+                PyList_SET_ITEM(resultlst, i, PcapmlSample);
             }
 
             sstate->enum_index++;
@@ -80,8 +109,8 @@ sampler_next(SamplerState *sstate)
 
 PyTypeObject PySampler_Type = {
     PyVarObject_HEAD_INIT(&PyType_Type, 0)
-    "sampler",                       /* tp_name */
-    sizeof(SamplerState),             /* tp_basicsize */
+    "pcapml_FE",                     /* tp_name */
+    sizeof(SamplerState),            /* tp_basicsize */
     0,                               /* tp_itemsize */
     (destructor)sampler_dealloc,     /* tp_dealloc */
     0,                               /* tp_print */
@@ -122,15 +151,17 @@ PyTypeObject PySampler_Type = {
 
 static struct PyModuleDef pcapmlmodule = {
     PyModuleDef_HEAD_INIT,
-    "pcapML",
-    "Python module for the pcapML library",
+    "pcapml_FE",
+    "Python module for the pcapML feature exploration library",
     -1,
 };
 
 PyMODINIT_FUNC
-PyInit_pcapML(void)
+PyInit_pcapml_FE(void)
 {
     PyObject *module = PyModule_Create(&pcapmlmodule);
+    PyStructSequence_InitType(&PcapmlSampleType, &pcapml_sample_desc);
+
     if (!module)
         return NULL;
 
