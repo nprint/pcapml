@@ -27,6 +27,7 @@ static struct argp_option options[] = {
     {"outdir", 'O', "FILE", 0, "output directory for split pcaps"},
     {"label_file", 'L', "FILE", 0, "labels for packets"},
     {"sort", 's', 0, 0, "sort pcapng by sampleid -> time"},
+    {"device", 'd', "STRING", 0, "device (if not default) to capture traffic from"},
     {0}};
 
 struct arguments {
@@ -37,6 +38,7 @@ struct arguments {
     char *file_dir = NULL;
     char *pcapml = NULL;
     char *outdir = NULL;
+    char *device = NULL;
 };
 
 static error_t parse_opt(int key, char *arg, struct argp_state *state) {
@@ -64,6 +66,9 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state) {
     case 's':
         arguments->sort = true;
         break;
+    case 'd':
+        arguments->device = arg;
+        break;
     default:
         return ARGP_ERR_UNKNOWN;
     }
@@ -87,27 +92,34 @@ int main(int argc, char **argv) {
         printf("No output configuration, exiting\n");
         exit(1);
     }
-
-    if (arguments.file_dir != NULL && arguments.labels != NULL) {
+    if(arguments.labels == NULL && arguments.sort != true) {
+        printf("No metadata to attach, exiting\n");
+        exit(2);
+    }
+    
+    if(arguments.file_dir == NULL && arguments.pcap == NULL) {
+        printf("processing live traffic\n");
+        rv = labeler.label_pcap(arguments.labels, arguments.device, 
+                                arguments.outfile, true);
+        if(rv == false) {
+            printf("Error parsing live traffic, exiting\n");
+            exit(5);
+        }
+    }
+    if (arguments.pcap != NULL) {
+        printf("Labeling PCAP: %s\n", arguments.pcap);
+        rv = labeler.label_pcap(arguments.labels,arguments.pcap, 
+                                arguments.outfile, false);
+        if (rv == false) {
+            printf("Failure while parsing pcap\n");
+            exit(4);
+        }
+    }
+    if (arguments.file_dir != NULL) {
         printf("Labeling directory: %s\n", arguments.file_dir);
         d.label_dir(std::string(arguments.file_dir),
                     std::string(arguments.labels),
                     std::string(arguments.outfile));
-    }
-
-    if (arguments.pcap != NULL && arguments.labels != NULL) {
-        printf("Loading labels...\n");
-        rv = labeler.load_labels(arguments.labels);
-        if (rv == false) {
-            printf("Error loading labels, exiting\n");
-            exit(1);
-        }
-        printf("Labeling PCAP: %s\n", arguments.pcap);
-        rv = labeler.label_pcap(arguments.pcap, arguments.outfile);
-        if (rv == false) {
-            printf("Failure while parsing pcap\n");
-            exit(1);
-        }
     }
 
     /* TODO use tmp file so that we can label & sort in 1 cmd */

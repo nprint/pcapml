@@ -19,7 +19,8 @@ class Label {
  public:
     void print();
     bool set_info(std::string label, std::string bpf_filter = "",
-                  uint64_t ts_start = 0, uint64_t ts_end = UINT64_MAX);
+                  uint64_t ts_start = 0, uint64_t ts_end = UINT64_MAX,
+                  pcap_t *handle = NULL);
     std::string get_label();
     std::string get_sample_id();
     std::string get_comment_string();
