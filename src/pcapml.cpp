@@ -92,23 +92,23 @@ int main(int argc, char **argv) {
         printf("No output configuration, exiting\n");
         exit(1);
     }
-    if(arguments.labels == NULL && arguments.sort != true) {
+    if (arguments.labels == NULL && arguments.sort != true) {
         printf("No metadata to attach, exiting\n");
         exit(2);
     }
-    
-    if(arguments.file_dir == NULL && arguments.pcap == NULL) {
+
+    if (arguments.file_dir == NULL && arguments.pcap == NULL) {
         printf("processing live traffic\n");
-        rv = labeler.label_pcap(arguments.labels, arguments.device, 
+        rv = labeler.label_pcap(arguments.labels, arguments.device,
                                 arguments.outfile, true);
-        if(rv == false) {
+        if (rv == false) {
             printf("Error parsing live traffic, exiting\n");
             exit(5);
         }
     }
     if (arguments.pcap != NULL) {
         printf("Labeling PCAP: %s\n", arguments.pcap);
-        rv = labeler.label_pcap(arguments.labels,arguments.pcap, 
+        rv = labeler.label_pcap(arguments.labels, arguments.pcap,
                                 arguments.outfile, false);
         if (rv == false) {
             printf("Failure while parsing pcap\n");

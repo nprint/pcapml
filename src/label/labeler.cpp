@@ -35,8 +35,9 @@ bool PcapMLLabeler::load_labels(char *label_file, pcap_t *handle) {
 
         l = new Label();
         rv = l->set_info(label, bpf_filter, ts_start, ts_end, handle);
-        if(!(rv)) {
-            printf("failure creating label instance for line: %s\n", line.c_str());
+        if (!(rv)) {
+            printf("failure creating label instance for line: %s\n",
+                   line.c_str());
             delete l;
             continue;
         } else {
@@ -55,7 +56,7 @@ void sig_handler(int useless) {
     stop = 1;
 }
 
-bool PcapMLLabeler::label_pcap(char *label_file, char *infile, char *outfile, 
+bool PcapMLLabeler::label_pcap(char *label_file, char *infile, char *outfile,
                                bool infile_is_device) {
     uint16_t linktype;
     uint64_t matched, total;
@@ -64,33 +65,32 @@ bool PcapMLLabeler::label_pcap(char *label_file, char *infile, char *outfile,
     PcapReader r;
     pcap_packet_info *pi;
 
-    if(infile_is_device) {
+    if (infile_is_device) {
         r.open_live(infile);
-    }
-    else {
+    } else {
         r.open_file(infile);
     }
-    
+
     /* IO */
     linktype = r.get_linktype();
     w.open_file(outfile);
-    w.write_interface_block(linktype, 0); 
+    w.write_interface_block(linktype, 0);
 
     /* Load labels now that we have the pcap_t */
     load_labels(label_file, r.get_pcap_t());
-    
+
     if (labels.size() == 0) {
         printf("Cowardly refusing to label pcap without any labels loaded\n");
         return false;
     }
 
     /* register signal now */
-    signal(SIGINT, sig_handler);  
+    signal(SIGINT, sig_handler);
 
     total = 0;
     matched = 0;
-    while(1) {
-        if(stop) {
+    while (1) {
+        if (stop) {
             break;
         }
         pi = r.get_next_packet();
@@ -108,9 +108,6 @@ bool PcapMLLabeler::label_pcap(char *label_file, char *infile, char *outfile,
         total++;
     }
     w.close_file();
-    
-    if(stop) exit(5);
-
 
     return true;
 }

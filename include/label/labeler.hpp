@@ -8,10 +8,10 @@
 #ifndef INCLUDE_LABEL_LABELER_HPP_
 #define INCLUDE_LABEL_LABELER_HPP_
 
+#include <signal.h>
 
 #include <vector>
 #include <fstream>
-#include <signal.h>
 
 static volatile int stop = 0;
 
@@ -27,7 +27,8 @@ static volatile int stop = 0;
 
 class PcapMLLabeler {
  public:
-    bool label_pcap(char *label_file, char *pcap, char *outfile, bool infile_is_device);
+    bool label_pcap(char *label_file, char *pcap, char *outfile,
+                    bool infile_is_device);
  private:
     std::vector<Label *> labels;
     bool load_labels(char *label_file, pcap_t *handle = NULL);
