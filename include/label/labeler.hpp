@@ -8,8 +8,12 @@
 #ifndef INCLUDE_LABEL_LABELER_HPP_
 #define INCLUDE_LABEL_LABELER_HPP_
 
+
 #include <vector>
 #include <fstream>
+#include <signal.h>
+
+static volatile int stop = 0;
 
 #include "util.hpp"
 #include "label.hpp"

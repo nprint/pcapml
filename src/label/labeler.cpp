@@ -51,6 +51,10 @@ bool PcapMLLabeler::load_labels(char *label_file, pcap_t *handle) {
     }
 }
 
+void sig_handler(int useless) {
+    stop = 1;
+}
+
 bool PcapMLLabeler::label_pcap(char *label_file, char *infile, char *outfile, 
                                bool infile_is_device) {
     uint16_t linktype;
@@ -80,27 +84,33 @@ bool PcapMLLabeler::label_pcap(char *label_file, char *infile, char *outfile,
         return false;
     }
 
+    /* register signal now */
+    signal(SIGINT, sig_handler);  
+
     total = 0;
     matched = 0;
-    while (1) {
+    while(1) {
+        if(stop) {
+            break;
+        }
         pi = r.get_next_packet();
         if (pi == NULL) {
             break;
         }
-        printf("hit loop\n");
         for (vit = labels.begin(); vit != labels.end(); vit++) {
             /* match here */
             if ((*vit)->match_packet(pi)) {
-                printf("got me a match ho\n");
                 w.write_epb_from_pcap_pkt(pi, (*vit)->get_comment_string());
                 matched++;
                 break;
             }
         }
-        printf("%d, %d\n", total, matched);
         total++;
     }
     w.close_file();
+    
+    if(stop) exit(5);
+
 
     return true;
 }
