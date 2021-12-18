@@ -24,10 +24,9 @@ std::string Label::get_unhashed_sample_id() {
 }
 
 bool Label::set_info(std::string label, std::string bpf_string_filter,
-                     uint64_t ts_start, uint64_t ts_end) {
+                     uint64_t ts_start, uint64_t ts_end, pcap_t *handle) {
     bool rv;
     std::hash<std::string> str_hash;
-    pcap_t *fake_handle;
 
     rv = true;
     /* set passed in values */
@@ -39,9 +38,11 @@ bool Label::set_info(std::string label, std::string bpf_string_filter,
     /* make sure filter is valid */
     if (bpf_string_filter.compare("") != 0) {
         bpf_pcap_filter = new bpf_program;
-        fake_handle = pcap_open_dead(1, 4096);
-        if (pcap_compile(fake_handle, bpf_pcap_filter,
-                         bpf_string_filter.c_str(), 1, 0) == -1) {
+        if (handle == NULL) {
+            handle = pcap_open_dead(1, 4096);
+        }
+        if (pcap_compile(handle, bpf_pcap_filter,
+                         bpf_string_filter.c_str(), 1, PCAP_NETMASK_UNKNOWN) != 0) {
             printf("Invalid BPF filter: %s\n", bpf_string_filter.c_str());
             return false;
         }
@@ -75,7 +76,5 @@ bool Label::match_packet(pcap_packet_info *pi) {
 void Label::print() {
     printf("Label {\n");
     printf("  bpf:    %s\n",  bpf_string_filter.c_str());
-    printf("  tstart: %llu\n", ts_start);
-    printf("  tend:   %llu\n", ts_end);
     printf("}\n");
 }

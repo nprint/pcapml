@@ -22,13 +22,13 @@
 class PcapReader {
  public:
     void close_file();
+    pcap_t *get_pcap_t();
+    uint16_t get_linktype();
+    int open_live(char *devce);
     int open_file(char *infile);
     pcap_packet_info *get_next_packet();
-    uint16_t get_linktype(); 
-
  private:
-    pcap_t *f;
-    pcap_t *get_pcap_handle();
+    pcap_t *f = NULL;
 };
 
 #endif  // INCLUDE_PCAP_READER_PCAP_HPP_

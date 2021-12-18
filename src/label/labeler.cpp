@@ -7,7 +7,7 @@
 
 #include "labeler.hpp"
 
-bool PcapMLLabeler::load_labels(char *label_file) {
+bool PcapMLLabeler::load_labels(char *label_file, pcap_t *handle) {
     bool rv;
     Label *l;
     std::vector<std::string> tokens;
@@ -34,9 +34,10 @@ bool PcapMLLabeler::load_labels(char *label_file) {
         if (tsize >= 4) ts_end = std::stoull(tokens[TS_END]);
 
         l = new Label();
-        rv = l->set_info(label, bpf_filter, ts_start, ts_end);
-        if(!(rv)) {
-            printf("failure creating label instance for line: %s\n", line.c_str());
+        rv = l->set_info(label, bpf_filter, ts_start, ts_end, handle);
+        if (!(rv)) {
+            printf("failure creating label instance for line: %s\n",
+                   line.c_str());
             delete l;
             continue;
         } else {
@@ -51,7 +52,12 @@ bool PcapMLLabeler::load_labels(char *label_file) {
     }
 }
 
-bool PcapMLLabeler::label_pcap(char *infile, char *outfile) {
+void sig_handler(int useless) {
+    stop = 1;
+}
+
+bool PcapMLLabeler::label_pcap(char *label_file, char *infile, char *outfile,
+                               bool infile_is_device) {
     uint16_t linktype;
     uint64_t matched, total;
     std::vector<Label *>::iterator vit;
@@ -59,19 +65,34 @@ bool PcapMLLabeler::label_pcap(char *infile, char *outfile) {
     PcapReader r;
     pcap_packet_info *pi;
 
+    if (infile_is_device) {
+        r.open_live(infile);
+    } else {
+        r.open_file(infile);
+    }
+
+    /* IO */
+    linktype = r.get_linktype();
+    w.open_file(outfile);
+    w.write_interface_block(linktype, 0);
+
+    /* Load labels now that we have the pcap_t */
+    load_labels(label_file, r.get_pcap_t());
+
     if (labels.size() == 0) {
         printf("Cowardly refusing to label pcap without any labels loaded\n");
         return false;
     }
-    /* IO */
-    r.open_file(infile);
-    linktype = r.get_linktype();
-    w.open_file(outfile);
-    w.write_interface_block(linktype, 0); 
+
+    /* register signal now */
+    signal(SIGINT, sig_handler);
 
     total = 0;
     matched = 0;
     while (1) {
+        if (stop) {
+            break;
+        }
         pi = r.get_next_packet();
         if (pi == NULL) {
             break;
