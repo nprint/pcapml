@@ -92,49 +92,49 @@ int main(int argc, char **argv) {
         printf("No output configuration, exiting\n");
         exit(1);
     }
-    if (arguments.labels == NULL && arguments.sort != true) {
-        printf("No metadata to attach, exiting\n");
-        exit(2);
-    }
-
-    if (arguments.file_dir == NULL && arguments.pcap == NULL) {
-        printf("processing live traffic\n");
-        rv = labeler.label_pcap(arguments.labels, arguments.device,
-                                arguments.outfile, true);
-        if (rv == false) {
-            printf("Error parsing live traffic, exiting\n");
-            exit(5);
+    
+    if(arguments.pcapml != NULL) {
+        if (arguments.sort == true) {
+            printf("Sorting pcapml\n");
+            rv = sorter.sort_pcapng(arguments.pcapml, arguments.outfile);
+            if(rv != 0) {
+                printf("Error sorting pcapML file\n");
+                exit(9);
+            }
         }
-    }
-    if (arguments.pcap != NULL) {
-        printf("Labeling PCAP: %s\n", arguments.pcap);
-        rv = labeler.label_pcap(arguments.labels, arguments.pcap,
-                                arguments.outfile, false);
-        if (rv == false) {
-            printf("Failure while parsing pcap\n");
-            exit(4);
-        }
-    }
-    if (arguments.file_dir != NULL) {
-        printf("Labeling directory: %s\n", arguments.file_dir);
-        d.label_dir(std::string(arguments.file_dir),
-                    std::string(arguments.labels),
-                    std::string(arguments.outfile));
-    }
-
-    /* TODO use tmp file so that we can label & sort in 1 cmd */
-    if (arguments.sort == true && arguments.pcapml != NULL) {
-        printf("Sorting pcapml\n");
-        sorter.sort_pcapng(arguments.pcapml, arguments.outfile);
-    }
-
-    if (arguments.pcapml != NULL && arguments.outdir != NULL) {
-        rv = splitter.split_pcapng(arguments.pcapml, arguments.outdir);
-        if (rv != 0) {
-            printf("Error while splitting pcapml file\n");
-            exit(3);
+        if (arguments.outdir != NULL) {
+            rv = splitter.split_pcapng(arguments.pcapml, arguments.outdir);
+            if (rv != 0) {
+                printf("Error while splitting pcapml file\n");
+                exit(3);
+            }
         }
     }
 
-    return 0;
+    if(arguments.labels != NULL) {
+        if(arguments.file_dir != NULL) {
+            printf("Labeling directory: %s\n", arguments.file_dir);
+            d.label_dir(std::string(arguments.file_dir),
+                        std::string(arguments.labels),
+                        std::string(arguments.outfile));
+        } else if (arguments.pcap != NULL) {
+            printf("Labeling PCAP: %s\n", arguments.pcap);
+            rv = labeler.label_pcap(arguments.labels, arguments.pcap,
+                                    arguments.outfile, false);
+            if (rv == false) {
+                printf("Failure while parsing pcap\n");
+                exit(4);
+            }
+        } else {
+            printf("processing live traffic\n");
+            rv = labeler.label_pcap(arguments.labels, arguments.device,
+                                    arguments.outfile, true);
+            if (rv == false) {
+                printf("Error parsing live traffic, exiting\n");
+                exit(5);
+            }
+        }
+    }
+    
+    exit(0);
 }
