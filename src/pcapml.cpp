@@ -99,8 +99,8 @@ int main(int argc, char **argv) {
         fprintf(stderr, "No output configuration, exiting\n");
         exit(1);
     }
-    
-    if(arguments.pcapml != NULL) {
+
+    if (arguments.pcapml != NULL) {
         if (arguments.strip == true) {
             printf("stripping pcapNG file and turning into pcap\n");
             rv = stripper.strip_pcapng(arguments.pcapml, arguments.outfile);
@@ -126,8 +126,8 @@ int main(int argc, char **argv) {
         }
     }
 
-    if(arguments.labels != NULL) {
-        if(arguments.file_dir != NULL) {
+    if (arguments.labels != NULL) {
+        if (arguments.file_dir != NULL) {
             printf("Labeling directory: %s\n", arguments.file_dir);
             d.label_dir(std::string(arguments.file_dir),
                         std::string(arguments.labels),
@@ -150,6 +150,6 @@ int main(int argc, char **argv) {
             }
         }
     }
-    
+
     exit(0);
 }

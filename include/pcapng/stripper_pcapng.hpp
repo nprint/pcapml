@@ -16,15 +16,15 @@
 #include "writer_pcap.hpp"
 
 class Stripper : public PcapNGReader {
-  public:
+ public:
     bool process_block(Block *b, void *p);
     int strip_pcapng(char *infile, char *outfile);
-  private:
+ private:
     PcapWriter w;
-    uint16_t link_type=SENTINEL_LINKTYPE;
-    
+    uint16_t link_type = SENTINEL_LINKTYPE;
+
     int process_packet_block(Block *b);
-    int process_interface_header(Block *b, char *outfile); 
+    int process_interface_header(Block *b, char *outfile);
 };
 
 #endif  // INCLUDE_PCAPNG_STRIPPER_PCAPNG_HPP_

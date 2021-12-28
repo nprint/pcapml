@@ -10,17 +10,15 @@
 bool Stripper::process_block(Block *b, void *p) {
     uint32_t rv, block_type;
 
-    block_type = b->get_block_type();
-    
     rv = 0;
-    printf("processing block\n");
+    block_type = b->get_block_type();
     if (block_type == INTERFACE_HEADER) {
         rv = process_interface_header(b, (char *) p);
-    } else if(block_type == ENHANCED_PKT_HEADER) {
+    } else if (block_type == ENHANCED_PKT_HEADER) {
         rv = process_packet_block(b);
     }
 
-    if(rv == 0) {
+    if (rv == 0) {
         return true;
     } else {
         return false;
@@ -30,16 +28,15 @@ bool Stripper::process_block(Block *b, void *p) {
 int Stripper::process_interface_header(Block *b, char *outfile) {
     uint32_t rv;
     InterfaceDescription *idb;
-    
-    idb = (InterfaceDescription *) b->get_block_buf(); 
-    if(link_type == SENTINEL_LINKTYPE) {
+
+    idb = (InterfaceDescription *) b->get_block_buf();
+    if (link_type == SENTINEL_LINKTYPE) {
         link_type = idb->link_type;
         rv = w.open_file(outfile, link_type);
         if (rv != 0) {
             fprintf(stderr, "Error opening pcap file, exiting\n");
         }
-    }
-    else {
+    } else {
         rv = 1;
         fprintf(stderr, "PCAP does not support multiple linktypes in a single capture\n");
     }
@@ -52,12 +49,12 @@ int Stripper::process_packet_block(Block *b) {
     EnhancedPacketBlock *epb;
 
     epb = (EnhancedPacketBlock *) b->get_block_buf();
-    
+
     hdr.caplen = epb->cap_len;
     hdr.len = epb->og_len;
     hdr.ts.tv_sec = epb->ts_high;
     hdr.ts.tv_usec = epb->ts_low;
-    
+
     w.write_packet(&hdr, b->get_data_buf());
 
     return 0;
@@ -66,7 +63,7 @@ int Stripper::process_packet_block(Block *b) {
 int Stripper::strip_pcapng(char *infile, char *outfile) {
     Block *b;
     uint32_t rv;
-    
+
     rv = open_pcapng(infile);
     if (rv != 0) {
         return 1;
@@ -78,7 +75,7 @@ int Stripper::strip_pcapng(char *infile, char *outfile) {
             break;
         }
         process_block(b, (void *) outfile);
-        
+
         delete b;
     }
 
