@@ -14,6 +14,7 @@
 #include "reader_pcapng.hpp"
 #include "sorter_pcapng.hpp"
 #include "splitter_pcapng.hpp"
+#include "stripper_pcapng.hpp"
 
 const char *argp_program_version = "pcapml 0.2.1";
 const char *argp_program_bug_address = "https://github.com/nprint/pcapml";
@@ -27,11 +28,13 @@ static struct argp_option options[] = {
     {"outdir", 'O', "FILE", 0, "output directory for split pcaps"},
     {"label_file", 'L', "FILE", 0, "labels for packets"},
     {"sort", 's', 0, 0, "sort pcapng by sampleid -> time"},
+    {"strip", 'p', 0, 0, "strip pcapng of metadata and transform to pcap"},
     {"device", 'd', "STRING", 0, "device (if not default) to capture traffic from"},
     {0}};
 
 struct arguments {
     bool sort = false;
+    bool strip = false;
     char *pcap = NULL;
     char *outfile = NULL;
     char *labels = NULL;
@@ -66,6 +69,9 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state) {
     case 's':
         arguments->sort = true;
         break;
+    case 'p':
+        arguments->strip = true;
+        break;
     case 'd':
         arguments->device = arg;
         break;
@@ -86,18 +92,27 @@ int main(int argc, char **argv) {
     DirLabeler d;
     Sorter sorter;
     Splitter splitter;
+    Stripper stripper;
     PcapMLLabeler labeler;
 
     if (arguments.outfile == NULL && arguments.outdir == NULL) {
-        printf("No output configuration, exiting\n");
+        fprintf(stderr, "No output configuration, exiting\n");
         exit(1);
     }
     
     if(arguments.pcapml != NULL) {
+        if (arguments.strip == true) {
+            printf("stripping pcapNG file and turning into pcap\n");
+            rv = stripper.strip_pcapng(arguments.pcapml, arguments.outfile);
+            if (rv != 0) {
+                fprintf(stderr, "Error stripping pcapNG file\n");
+                exit(10);
+            }
+        }
         if (arguments.sort == true) {
             printf("Sorting pcapml\n");
             rv = sorter.sort_pcapng(arguments.pcapml, arguments.outfile);
-            if(rv != 0) {
+            if (rv != 0) {
                 printf("Error sorting pcapML file\n");
                 exit(9);
             }
