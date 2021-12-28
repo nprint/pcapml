@@ -67,7 +67,6 @@ int Stripper::strip_pcapng(char *infile, char *outfile) {
     Block *b;
     uint32_t rv;
     
-    writer_opened = false;
     rv = open_pcapng(infile);
     if (rv != 0) {
         return 1;
