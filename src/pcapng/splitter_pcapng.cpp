@@ -25,7 +25,7 @@ bool Splitter::process_block(Block *b, void *p) {
 
 bool Splitter::process_idb(Block *b) {
     InterfaceDescription *idb;
-
+    
     idb = (InterfaceDescription *) b->get_block_buf();
     cur_linktype = idb->link_type;
 
