@@ -86,7 +86,7 @@ bool PcapMLLabeler::label_pcap(char *label_file, char *infile, char *outfile,
     /* register signal now */
     signal(SIGINT, sig_handler);
 
-    
+
     while (1) {
         if (stop) {
             break;
@@ -94,10 +94,10 @@ bool PcapMLLabeler::label_pcap(char *label_file, char *infile, char *outfile,
         pi = r.get_next_packet();
         if (pi == NULL) {
             break;
-        }
-        else if (pi->pcap_next_rv == PCAP_NEXT_EX_NOP) {
+        } else if (pi->pcap_next_rv == PCAP_NEXT_EX_NOP) {
             continue;
         }
+
         for (vit = labels.begin(); vit != labels.end(); vit++) {
             /* match here */
             if ((*vit)->match_packet(pi)) {

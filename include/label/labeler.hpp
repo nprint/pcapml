@@ -34,7 +34,7 @@ class PcapMLLabeler {
     std::vector<Label *> labels;
     uint64_t packets_matched = 0;
     uint64_t packets_received = 0;
-    
+
     bool load_labels(char *label_file, pcap_t *handle = NULL);
 };
 

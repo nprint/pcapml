@@ -56,15 +56,15 @@ pcap_packet_info *PcapReader::get_next_packet() {
     pcap_pkthdr *hdr;
     const u_int8_t *buf;
     pcap_packet_info *pi;
-    
+
     rv = pcap_next_ex(f, &hdr, &buf);
-    if(rv == PCAP_NEXT_EX_EOF) {
+    if (rv == PCAP_NEXT_EX_EOF) {
         return NULL;
     } else if (rv == PCAP_NEXT_EX_ERR) {
         pcap_perror(f, "Error while reading pcap: ");
         exit(99);
     }
-    
+
     pi = new pcap_packet_info;
     pi->hdr = hdr;
     pi->buf = buf;
@@ -83,8 +83,8 @@ void PcapReader::print_stats(FILE *stream) {
 
     rv = pcap_stats(f, &ps);
     /* return as PCAP stats do not work on non-live captures */
-    if(rv != 0) return;
-    
+    if (rv != 0) return;
+
     fprintf(stream, "PCAP: packets received: %d\n", ps.ps_recv);
     fprintf(stream, "PCAP: packet buffer drops: %d\n", ps.ps_drop);
     fprintf(stream, "PCAP: packet interface drops: %d\n", ps.ps_ifdrop);
