@@ -57,9 +57,8 @@ void sig_handler(int useless) {
 }
 
 bool PcapMLLabeler::label_pcap(char *label_file, char *infile, char *outfile,
-                               bool infile_is_device) {
+                               bool infile_is_device, bool stats_out) {
     uint16_t linktype;
-    uint64_t matched, total;
     std::vector<Label *>::iterator vit;
     PcapNGWriter w;
     PcapReader r;
@@ -87,8 +86,7 @@ bool PcapMLLabeler::label_pcap(char *label_file, char *infile, char *outfile,
     /* register signal now */
     signal(SIGINT, sig_handler);
 
-    total = 0;
-    matched = 0;
+
     while (1) {
         if (stop) {
             break;
@@ -96,18 +94,31 @@ bool PcapMLLabeler::label_pcap(char *label_file, char *infile, char *outfile,
         pi = r.get_next_packet();
         if (pi == NULL) {
             break;
+        } else if (pi->pcap_next_rv == PCAP_NEXT_EX_NOP) {
+            continue;
         }
+
         for (vit = labels.begin(); vit != labels.end(); vit++) {
             /* match here */
             if ((*vit)->match_packet(pi)) {
                 w.write_epb_from_pcap_pkt(pi, (*vit)->get_comment_string());
-                matched++;
+                packets_matched++;
                 break;
             }
         }
-        total++;
+        delete pi;
+        packets_received++;
+    }
+    if (stats_out) {
+        print_stats(stdout);
+        r.print_stats(stdout);
     }
     w.close_file();
 
     return true;
+}
+
+void PcapMLLabeler::print_stats(FILE *stream) {
+    fprintf(stream, "Labeler: packets received: %ld\n", packets_received);
+    fprintf(stream, "Labeler: packets matched:  %ld\n", packets_matched);
 }

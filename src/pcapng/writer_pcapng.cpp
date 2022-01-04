@@ -101,10 +101,10 @@ int PcapNGWriter::write_epb_from_pcap_pkt(pcap_packet_info *p, std::string comme
     EnhancedPacketBlock epb;
 
     epb.interface_id = 0;
-    epb.ts_high = p->hdr.ts.tv_sec;
-    epb.ts_low = p->hdr.ts.tv_usec;
-    epb.cap_len = p->hdr.caplen;
-    epb.og_len = p->hdr.len;
+    epb.ts_high = p->hdr->ts.tv_sec;
+    epb.ts_low = p->hdr->ts.tv_usec;
+    epb.cap_len = p->hdr->caplen;
+    epb.og_len = p->hdr->len;
 
     /* Base header + EPB header + packet + packet padding + comment 
      * + comment padding + option headers * 2 (end of options & comment)
