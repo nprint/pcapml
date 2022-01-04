@@ -52,22 +52,40 @@ pcap_t *PcapReader::get_pcap_t() {
 }
 
 pcap_packet_info *PcapReader::get_next_packet() {
-    pcap_pkthdr hdr;
+    int32_t rv;
+    pcap_pkthdr *hdr;
     const u_int8_t *buf;
     pcap_packet_info *pi;
-
-    fflush(stdout);
-    buf = pcap_next(f, &hdr);
-    if (buf == NULL) {
+    
+    rv = pcap_next_ex(f, &hdr, &buf);
+    if(rv == PCAP_NEXT_EX_EOF) {
         return NULL;
+    } else if (rv == PCAP_NEXT_EX_ERR) {
+        pcap_perror(f, "Error while reading pcap: ");
+        exit(99);
     }
+    
     pi = new pcap_packet_info;
     pi->hdr = hdr;
     pi->buf = buf;
+    pi->pcap_next_rv = rv;
 
     return pi;
 }
 
 uint16_t PcapReader::get_linktype() {
     return pcap_datalink(f);
+}
+
+void PcapReader::print_stats(FILE *stream) {
+    int32_t rv;
+    struct pcap_stat ps;
+
+    rv = pcap_stats(f, &ps);
+    /* return as PCAP stats do not work on non-live captures */
+    if(rv != 0) return;
+    
+    fprintf(stream, "PCAP: packets received: %d\n", ps.ps_recv);
+    fprintf(stream, "PCAP: packet buffer drops: %d\n", ps.ps_drop);
+    fprintf(stream, "PCAP: packet interface drops: %d\n", ps.ps_ifdrop);
 }

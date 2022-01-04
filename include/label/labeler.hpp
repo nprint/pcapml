@@ -27,10 +27,14 @@ static volatile int stop = 0;
 
 class PcapMLLabeler {
  public:
+    void print_stats(FILE *stream);
     bool label_pcap(char *label_file, char *pcap, char *outfile,
-                    bool infile_is_device);
+                    bool infile_is_device, bool print_stats);
  private:
     std::vector<Label *> labels;
+    uint64_t packets_matched = 0;
+    uint64_t packets_received = 0;
+    
     bool load_labels(char *label_file, pcap_t *handle = NULL);
 };
 

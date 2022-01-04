@@ -14,6 +14,10 @@
 #include <net/ethernet.h>
 #endif
 
+#define PCAP_NEXT_EX_EOF -2
+#define PCAP_NEXT_EX_ERR -1
+#define PCAP_NEXT_EX_NOP 0
+
 #define LINUX_COOKED_HEADER_SIZE 16
 
 #include <pcap.h>
@@ -26,6 +30,7 @@ class PcapReader {
     uint16_t get_linktype();
     int open_live(char *devce);
     int open_file(char *infile);
+    void print_stats(FILE *stream);
     pcap_packet_info *get_next_packet();
  private:
     pcap_t *f = NULL;

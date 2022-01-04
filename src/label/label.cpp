@@ -48,7 +48,6 @@ bool Label::set_info(std::string label, std::string bpf_string_filter,
         }
     }
 
-
     /* build longid, hashid, and comment string for file */
     unhashed_sample_id = label + "_" + bpf_string_filter + "_" + std::to_string(ts_start) + "_" + std::to_string(ts_end);
     sample_id = std::to_string(str_hash(unhashed_sample_id));
@@ -65,9 +64,9 @@ bool Label::match_packet(pcap_packet_info *pi) {
     int bpf_match;
     bool ts_match;
 
-    bpf_match = pcap_offline_filter(bpf_pcap_filter, &(pi->hdr), pi->buf);
+    bpf_match = pcap_offline_filter(bpf_pcap_filter, pi->hdr, pi->buf);
 
-    pkt_ts = pi->hdr.ts.tv_sec;
+    pkt_ts = pi->hdr->ts.tv_sec;
     ts_match = ((ts_start <= pkt_ts) && (pkt_ts <= ts_end)) ? true : false;
 
     return bpf_match && ts_match;

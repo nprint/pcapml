@@ -28,6 +28,7 @@ static struct argp_option options[] = {
     {"outdir", 'O', "FILE", 0, "output directory for split pcaps"},
     {"label_file", 'L', "FILE", 0, "labels for packets"},
     {"sort", 's', 0, 0, "sort pcapng by sampleid -> time"},
+    {"stats", 't', 0, 0, "print stats when finished"},
     {"strip", 'p', 0, 0, "strip pcapng of metadata and transform to pcap"},
     {"device", 'd', "STRING", 0, "device (if not default) to capture traffic from"},
     {0}};
@@ -35,6 +36,7 @@ static struct argp_option options[] = {
 struct arguments {
     bool sort = false;
     bool strip = false;
+    bool stats = false;
     char *pcap = NULL;
     char *outfile = NULL;
     char *labels = NULL;
@@ -74,6 +76,9 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state) {
         break;
     case 'd':
         arguments->device = arg;
+        break;
+    case 't':
+        arguments->stats = true;
         break;
     default:
         return ARGP_ERR_UNKNOWN;
@@ -135,7 +140,7 @@ int main(int argc, char **argv) {
         } else if (arguments.pcap != NULL) {
             printf("Labeling PCAP: %s\n", arguments.pcap);
             rv = labeler.label_pcap(arguments.labels, arguments.pcap,
-                                    arguments.outfile, false);
+                                    arguments.outfile, false, arguments.stats);
             if (rv == false) {
                 printf("Failure while parsing pcap\n");
                 exit(4);
@@ -143,7 +148,7 @@ int main(int argc, char **argv) {
         } else {
             printf("processing live traffic\n");
             rv = labeler.label_pcap(arguments.labels, arguments.device,
-                                    arguments.outfile, true);
+                                    arguments.outfile, true, arguments.stats);
             if (rv == false) {
                 printf("Error parsing live traffic, exiting\n");
                 exit(5);
