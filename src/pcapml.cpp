@@ -10,7 +10,7 @@
 #include <string>
 
 #include "dir.hpp"
-#include "labeler.hpp"
+#include "pcap_labeler.hpp"
 #include "reader_pcapng.hpp"
 #include "sorter_pcapng.hpp"
 #include "splitter_pcapng.hpp"
@@ -21,16 +21,16 @@ const char *argp_program_bug_address = "https://github.com/nprint/pcapml";
 static char doc[] = "pcapML standardzies the interactions with traffic analysis datasets";
 static char args_doc[] = "";
 static struct argp_option options[] = {
-    {"pcap", 'P', "FILE", 0, "pcap to label"},
-    {"outfile", 'W', "FILE", 0, "outfile (pcapng)"},
-    {"file_dir", 'D', "FILE", 0, "directory of pcaps to label"},
-    {"pcapml", 'M', "FILE", 0, "pcapml to split"},
-    {"outdir", 'O', "FILE", 0, "output directory for split pcaps"},
-    {"label_file", 'L', "FILE", 0, "labels for packets"},
-    {"sort", 's', 0, 0, "sort pcapng by sampleid -> time"},
-    {"stats", 't', 0, 0, "print stats when finished"},
-    {"strip", 'p', 0, 0, "strip pcapng of metadata and transform to pcap"},
-    {"device", 'd', "STRING", 0, "device (if not default) to capture traffic from"},
+    {"pcap", 'P', "FILE", 0, "pcap to label", 0},
+    {"outfile", 'W', "FILE", 0, "outfile (pcapng)", 0},
+    {"file_dir", 'D', "FILE", 0, "directory of pcaps to label", 0},
+    {"pcapml", 'M', "FILE", 0, "pcapml to split", 0},
+    {"outdir", 'O', "FILE", 0, "output directory for split pcaps", 0},
+    {"label_file", 'L', "FILE", 0, "labels for packets", 0},
+    {"sort", 's', 0, 0, "sort pcapng by sampleid -> time", 1},
+    {"stats", 't', 0, 0, "print stats when finished", 2},
+    {"strip", 'p', 0, 0, "strip pcapng of metadata and transform to pcap", 1},
+    {"device", 'd', "STRING", 0, "device (if not default) to capture traffic from", 1},
     {0}};
 
 struct arguments {
@@ -98,7 +98,7 @@ int main(int argc, char **argv) {
     Sorter sorter;
     Splitter splitter;
     Stripper stripper;
-    PcapMLLabeler labeler;
+    PcapLabeler labeler;
 
     if (arguments.outfile == NULL && arguments.outdir == NULL) {
         fprintf(stderr, "No output configuration, exiting\n");

@@ -13,29 +13,20 @@
 #include <vector>
 #include <fstream>
 
-static volatile int stop = 0;
-
 #include "util.hpp"
 #include "label.hpp"
 #include "reader_pcap.hpp"
 #include "writer_pcapng.hpp"
 
-#define LABEL_FILE_LOC  0
-#define FILTER_LOC 1
-#define TS_START   2
-#define TS_END     3
+#define TRAFFIC_LOC  0
+#define METADATA_LOC 1
+#define HASHKEY_LOC  2
 
-class PcapMLLabeler {
+class Labeler {
  public:
-    void print_stats(FILE *stream);
-    bool label_pcap(char *label_file, char *pcap, char *outfile,
-                    bool infile_is_device, bool print_stats);
- private:
+    int load_labels(char *label_file, pcap_t *handle = NULL);
+ protected:
     std::vector<Label *> labels;
-    uint64_t packets_matched = 0;
-    uint64_t packets_received = 0;
-
-    bool load_labels(char *label_file, pcap_t *handle = NULL);
 };
 
 #endif  // INCLUDE_LABEL_LABELER_HPP_

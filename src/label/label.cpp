@@ -24,16 +24,20 @@ std::string Label::get_unhashed_sample_id() {
 }
 
 bool Label::set_info(std::string label, std::string bpf_string_filter,
-                     uint64_t ts_start, uint64_t ts_end, pcap_t *handle) {
+                     std::string file, std::string hash_key, 
+                     uint64_t ts_start, uint64_t ts_end, 
+                     pcap_t *handle) {
     bool rv;
     std::hash<std::string> str_hash;
 
     rv = true;
     /* set passed in values */
     this->label = label;
+    this->bpf_string_filter = bpf_string_filter;
+    this->file = file;
+    this->hash_key = hash_key;
     this->ts_end = ts_end;
     this->ts_start = ts_start;
-    this->bpf_string_filter = bpf_string_filter;
 
     /* make sure filter is valid */
     if (bpf_string_filter.compare("") != 0) {
@@ -48,11 +52,16 @@ bool Label::set_info(std::string label, std::string bpf_string_filter,
         }
     }
 
-    /* build longid, hashid, and comment string for file */
-    unhashed_sample_id = label + "_" + bpf_string_filter + "_" + std::to_string(ts_start) + "_" + std::to_string(ts_end);
-    sample_id = std::to_string(str_hash(unhashed_sample_id));
+    /* Build sampleID and comment string */
+    if (hash_key.compare("") != 0) {
+        sample_id = std::to_string(str_hash(hash_key));
+    } else {
+        unhashed_sample_id = label + bpf_string_filter + file + \
+                             std::to_string(ts_start) + std::to_string(ts_end);
+        sample_id = std::to_string(str_hash(unhashed_sample_id));
+    }
     comment_str = sample_id + "," + label;
-
+    
     /* mark that this label is ready */
     info_set = true;
 
