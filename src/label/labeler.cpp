@@ -5,87 +5,113 @@
  * of the License at https://www.apache.org/licenses/LICENSE-2.0
  */
 
+
 #include "labeler.hpp"
-
-bool PcapMLLabeler::load_labels(char *label_file, pcap_t *handle) {
-    bool rv;
-    Label *l;
-    std::vector<std::string> tokens;
-    uint64_t tsize, ts_start, ts_end;
-    std::string line, filter, label, bpf_filter, comment;
-
-    std::ifstream instream(label_file);
-    while (getline(instream, line)) {
-        tokenize_string(line, tokens, ',');
-        tsize = tokens.size();
-        if (tokens[0][0] == '#') continue;
-        if (tsize == 0 || tsize == 1) {
-            printf("not enough tokens on line: %s\n", line.c_str());
-            continue;
-        }
-
-        /* Set defaults to pass */
-        bpf_filter = "";
-        ts_start = 0;
-        ts_end = UINT64_MAX;
-        label = tokens[LABEL_FILE_LOC];
-        if (tsize >= 2) bpf_filter = tokens[FILTER_LOC];
-        if (tsize >= 3) ts_start = std::stoull(tokens[TS_START]);
-        if (tsize >= 4) ts_end = std::stoull(tokens[TS_END]);
-
-        l = new Label();
-        rv = l->set_info(label, bpf_filter, ts_start, ts_end, handle);
-        if (!(rv)) {
-            printf("failure creating label instance for line: %s\n",
-                   line.c_str());
-            delete l;
-            continue;
-        } else {
-            labels.push_back(l);
-        }
-    }
-
-    if (labels.size() > 0) {
-        return true;
-    } else {
-        return false;
-    }
-}
 
 void sig_handler(int useless) {
     stop = 1;
 }
 
-bool PcapMLLabeler::label_pcap(char *label_file, char *infile, char *outfile,
-                               bool infile_is_device, bool stats_out) {
-    uint16_t linktype;
-    std::vector<Label *>::iterator vit;
-    PcapNGWriter w;
-    PcapReader r;
-    pcap_packet_info *pi;
-
-    if (infile_is_device) {
-        r.open_live(infile);
-    } else {
-        r.open_file(infile);
-    }
-
-    /* IO */
-    linktype = r.get_linktype();
-    w.open_file(outfile);
-    w.write_interface_block(linktype, 0);
-
-    /* Load labels now that we have the pcap_t */
-    load_labels(label_file, r.get_pcap_t());
-
-    if (labels.size() == 0) {
-        printf("Cowardly refusing to label pcap without any labels loaded\n");
-        return false;
-    }
-
-    /* register signal now */
+int Labeler::load_labels(std::string label_file, pcap_t *handle) {
+    Label *l;
+    std::string line;
+    
+    /* register signal now as this is a one time process */
     signal(SIGINT, sig_handler);
 
+    printf("Loading labels\n");
+    std::ifstream instream(label_file);
+    while (getline(instream, line)) {
+        l = process_label_line(line, handle);
+        if (l != NULL) {
+            labels.push_back(l);
+        }
+    }
+    
+    printf("Number of labels successfully loaded: %ld\n", labels.size());
+    if (labels.size() != 0) {
+        return 0;
+    } else {
+        return 1;
+    }
+}
+
+Label *Labeler::process_label_line(std::string line, pcap_t *handle) {
+    Label *l;
+    std::string metadata, hash_key;
+    std::vector<std::string> line_tokens;
+
+    l = NULL;
+    tokenize_string(line, line_tokens, ',');
+
+    /* Skip non-normal lines */
+    if (line_tokens[0][0] == '#') return l;
+    if (line_tokens.size() != 2 && line_tokens.size() != 3) {
+        fprintf(stderr, "Incorrect number of tokens on line: %s\n", line.c_str());
+        return l;
+    }
+
+    /* Grab metadata and hashkey if it exists */
+    metadata = line_tokens[METADATA_LOC];
+
+    hash_key = "";
+    if (line_tokens.size() == 3) {
+        hash_key = line_tokens[HASHKEY_LOC];
+    }
+
+    l = process_traffic_filter(line_tokens[TRAFFIC_LOC], hash_key, metadata, handle);
+
+    return l;
+}
+
+Label *Labeler::process_traffic_filter(std::string traffic_filter,
+                                       std::string hash_key,
+                                       std::string metadata,
+                                       pcap_t *handle) {
+    Label *l;
+    uint32_t i, rv;
+    uint64_t ts_start, ts_end;
+    std::string bpf_filter, file;
+    std::vector<std::string> filter_tokens, block_tokens;
+
+    /* Defaults */
+    l = NULL;
+    file = "";
+    bpf_filter = "";
+    ts_start = 0;
+    ts_end = UINT64_MAX;
+
+    /* Process each individual traffic filter */
+    tokenize_string(traffic_filter, filter_tokens, '|');
+    for (i = 0; i < filter_tokens.size(); i++) {
+            tokenize_string(filter_tokens[i], block_tokens, ':');
+            if (block_tokens[0] == "BPF") {
+                bpf_filter = block_tokens[1];
+            } else if (block_tokens[0] == "TS_START") {
+                ts_start = std::stoull(block_tokens[1]);
+            } else if (block_tokens[0] == "TS_END") {
+                ts_end = std::stoull(block_tokens[1]);
+            } else if (block_tokens[0] == "FILE") {
+                file = block_tokens[1];
+            } else {
+                fprintf(stderr, "Error with traffic filter: %s\n", filter_tokens[i].c_str());
+                return NULL;
+            }
+    }
+
+    l = new Label();
+    rv = l->set_info(metadata, bpf_filter, file, hash_key,
+                     ts_start, ts_end, handle);
+    if (rv != 0) {
+        delete l;
+        return NULL;
+    }
+
+    return l;
+}
+
+int Labeler::process_traffic(PcapReader r) {
+    PcapPacketInfo *pi;
 
     while (1) {
         if (stop) {
@@ -97,28 +123,9 @@ bool PcapMLLabeler::label_pcap(char *label_file, char *infile, char *outfile,
         } else if (pi->pcap_next_rv == PCAP_NEXT_EX_NOP) {
             continue;
         }
-
-        for (vit = labels.begin(); vit != labels.end(); vit++) {
-            /* match here */
-            if ((*vit)->match_packet(pi)) {
-                w.write_epb_from_pcap_pkt(pi, (*vit)->get_comment_string());
-                packets_matched++;
-                break;
-            }
-        }
-        delete pi;
         packets_received++;
+        process_packet(pi);
+        delete pi;
     }
-    if (stats_out) {
-        print_stats(stdout);
-        r.print_stats(stdout);
-    }
-    w.close_file();
-
-    return true;
-}
-
-void PcapMLLabeler::print_stats(FILE *stream) {
-    fprintf(stream, "Labeler: packets received: %ld\n", packets_received);
-    fprintf(stream, "Labeler: packets matched:  %ld\n", packets_matched);
+    return 0;
 }
