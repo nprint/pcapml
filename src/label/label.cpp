@@ -28,8 +28,8 @@ std::string Label::get_unhashed_sample_id() {
 }
 
 uint32_t Label::set_info(std::string label, std::string bpf_string_filter,
-                     std::string file, std::string hash_key, 
-                     uint64_t ts_start, uint64_t ts_end, 
+                     std::string file, std::string hash_key,
+                     uint64_t ts_start, uint64_t ts_end,
                      pcap_t *handle) {
     std::hash<std::string> str_hash;
 
@@ -63,7 +63,7 @@ uint32_t Label::set_info(std::string label, std::string bpf_string_filter,
         sample_id = std::to_string(str_hash(unhashed_sample_id));
     }
     comment_str = sample_id + "," + label;
-    
+
     /* mark that this label is ready */
     info_set = true;
 

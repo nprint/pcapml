@@ -12,6 +12,7 @@
 
 static volatile int stop = 0;
 
+#include <string>
 #include <vector>
 #include <fstream>
 
@@ -28,7 +29,7 @@ class Labeler {
  public:
     virtual void print_stats() = 0;
     virtual uint32_t process_packet(PcapPacketInfo *pi) = 0;
-    
+
     int process_traffic(PcapReader r);
     int load_labels(std::string label_file, pcap_t *handle = NULL);
  protected:

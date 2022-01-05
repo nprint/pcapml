@@ -28,18 +28,18 @@ uint32_t PcapLabeler::label_pcap(char *label_file, char *infile, char *outfile,
 
     /* Load labels now that we have the pcap_t */
     rv = load_labels(label_file, r.get_pcap_t());
-    if(rv != 0) {
+    if (rv != 0) {
         fprintf(stderr, "Refusing to label pcap with zero labels loaded\n");
         return 1;
     }
-    
+
     process_traffic(r);
 
     if (stats_out) {
         print_stats();
         r.print_stats();
     }
-    
+
     r.close_file();
     w.close_file();
 
@@ -48,7 +48,7 @@ uint32_t PcapLabeler::label_pcap(char *label_file, char *infile, char *outfile,
 
 uint32_t PcapLabeler::process_packet(PcapPacketInfo *pi) {
     std::vector<Label *>::iterator vit;
-    
+
     for (vit = labels.begin(); vit != labels.end(); vit++) {
         /* match here */
         if ((*vit)->match_packet(pi)) {
@@ -57,7 +57,7 @@ uint32_t PcapLabeler::process_packet(PcapPacketInfo *pi) {
             return 0;
         }
     }
-    
+
     return 1;
 }
 

@@ -22,7 +22,7 @@ uint32_t DirLabeler::label_dir(std::string dir, std::string label_file,
     load_labels(label_file, NULL);
     build_file_label_map();
     process_directory(dir);
-    
+
     if (stats_out) {
         print_stats();
     }
@@ -36,9 +36,9 @@ void DirLabeler::build_file_label_map() {
     std::string file;
     std::vector<Label *>::iterator vit;
 
-    for(vit = labels.begin(); vit != labels.end(); vit++) {
+    for (vit = labels.begin(); vit != labels.end(); vit++) {
         file = (*vit)->get_file();
-        if(file != "") {
+        if (file != "") {
             file_labels.insert(make_pair(file, *vit));
         }
     }
@@ -52,7 +52,7 @@ uint32_t DirLabeler::process_directory(std::string dir) {
     struct dirent *de;
     char full_name[MAX_FILE_LEN];
     std::map<std::string, Label *>::iterator mit;
-    
+
     d = opendir(dir.c_str());
     if (d == NULL) {
         fprintf(stderr, "Error opening directory: %s\n", dir.c_str());
@@ -89,7 +89,7 @@ uint32_t DirLabeler::process_directory(std::string dir) {
         }
     }
 
-    
+
     closedir(d);
 
     return 0;
@@ -102,7 +102,7 @@ uint32_t DirLabeler::label_file(Label *l) {
     r.open_file((char *) l->get_file().c_str());
     linktype = r.get_linktype();
     if (linktype != cur_linktype) {
-        w.write_interface_block(linktype, 0); 
+        w.write_interface_block(linktype, 0);
         cur_linktype = linktype;
     }
 
