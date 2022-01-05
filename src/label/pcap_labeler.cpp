@@ -34,14 +34,14 @@ uint32_t PcapLabeler::label_pcap(char *label_file, char *infile, char *outfile,
     }
     
     process_traffic(r);
+
+    if (stats_out) {
+        print_stats();
+        r.print_stats();
+    }
     
     r.close_file();
     w.close_file();
-
-    if (stats_out) {
-        r.print_stats();
-        print_stats();
-    }
 
     return 0;
 }

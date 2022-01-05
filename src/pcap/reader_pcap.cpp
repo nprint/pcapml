@@ -80,7 +80,7 @@ uint16_t PcapReader::get_linktype() {
 void PcapReader::print_stats() {
     int32_t rv;
     struct pcap_stat ps;
-
+    
     rv = pcap_stats(f, &ps);
     /* return as PCAP stats do not work on non-live captures */
     if (rv != 0) return;
