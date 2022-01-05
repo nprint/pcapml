@@ -51,11 +51,11 @@ pcap_t *PcapReader::get_pcap_t() {
     return f;
 }
 
-pcap_packet_info *PcapReader::get_next_packet() {
+PcapPacketInfo *PcapReader::get_next_packet() {
     int32_t rv;
     pcap_pkthdr *hdr;
     const u_int8_t *buf;
-    pcap_packet_info *pi;
+    PcapPacketInfo *pi;
 
     rv = pcap_next_ex(f, &hdr, &buf);
     if (rv == PCAP_NEXT_EX_EOF) {
@@ -65,7 +65,7 @@ pcap_packet_info *PcapReader::get_next_packet() {
         exit(99);
     }
 
-    pi = new pcap_packet_info;
+    pi = new PcapPacketInfo;
     pi->hdr = hdr;
     pi->buf = buf;
     pi->pcap_next_rv = rv;
@@ -77,7 +77,7 @@ uint16_t PcapReader::get_linktype() {
     return pcap_datalink(f);
 }
 
-void PcapReader::print_stats(FILE *stream) {
+void PcapReader::print_stats() {
     int32_t rv;
     struct pcap_stat ps;
 
@@ -85,7 +85,7 @@ void PcapReader::print_stats(FILE *stream) {
     /* return as PCAP stats do not work on non-live captures */
     if (rv != 0) return;
 
-    fprintf(stream, "PCAP: packets received: %d\n", ps.ps_recv);
-    fprintf(stream, "PCAP: packet buffer drops: %d\n", ps.ps_drop);
-    fprintf(stream, "PCAP: packet interface drops: %d\n", ps.ps_ifdrop);
+    printf("PCAP: packets received: %d\n", ps.ps_recv);
+    printf("PCAP: packet buffer drops: %d\n", ps.ps_drop);
+    printf("PCAP: packet interface drops: %d\n", ps.ps_ifdrop);
 }

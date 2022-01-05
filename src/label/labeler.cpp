@@ -5,70 +5,128 @@
  * of the License at https://www.apache.org/licenses/LICENSE-2.0
  */
 
+
 #include "labeler.hpp"
 
-int Labeler::load_labels(char *label_file, pcap_t *handle) {
-    bool rv;
-    Label *l;
-    uint64_t tsize, ts_start, ts_end;
-    std::string line, filter, metadata, bpf_filter, comment, file, hash_key;
-    std::vector<std::string> line_tokens, traffic_tokens, filter_tokens;
+void sig_handler(int useless) {
+    stop = 1;
+}
 
+int Labeler::load_labels(std::string label_file, pcap_t *handle) {
+    Label *l;
+    std::string line;
+    
+    /* register signal now as this is a one time process */
+    signal(SIGINT, sig_handler);
+    
+    printf("Loading labels\n");
     std::ifstream instream(label_file);
     while (getline(instream, line)) {
-        printf("%s\n", line.c_str());
-        tokenize_string(line, line_tokens, ',');
-        tsize = line_tokens.size();
-        if (line_tokens[0][0] == '#') continue;
-        if (tsize != 2 && tsize != 3) {
-            printf("Incorrect number of tokens on line: %s\n", line.c_str());
-            continue;
-        }
-
-        /* Set defaults to pass */
-        file = "";
-        hash_key = "";
-        bpf_filter = "";
-        ts_start = 0;
-        ts_end = UINT64_MAX;
-        metadata = line_tokens[METADATA_LOC];
-    
-        /* parse out traffic filter */
-        tokenize_string(line_tokens[TRAFFIC_LOC], traffic_tokens, '|');
-        for(uint32_t i = 0; i < traffic_tokens.size(); i++) {
-            tokenize_string(traffic_tokens[i], filter_tokens, ':');
-            if(filter_tokens[0] == "BPF") {
-                bpf_filter = filter_tokens[1];
-            } else if(filter_tokens[0] == "TS_START") {
-                ts_start = std::stoull(filter_tokens[1]);
-            } else if(filter_tokens[0] == "TS_END") {
-                ts_end = std::stoull(filter_tokens[1]);
-            } else if(filter_tokens[0] == "FILE") {
-                file = filter_tokens[1];
-            }
-        }
-        
-        /* Grab hash key if exists */
-        if(tsize == 3) {
-            hash_key = line_tokens[HASHKEY_LOC];
-        }
-
-        l = new Label();
-        rv = l->set_info(metadata, bpf_filter, file, hash_key,
-                         ts_start, ts_end, handle);
-        if (!(rv)) {
-            printf("failure creating label instance for line: %s\n",
-                   line.c_str());
-            delete l;
-            continue;
-        } else {
+        l = process_label_line(line, handle);
+        if(l != NULL) {
             labels.push_back(l);
         }
     }
-
-    if (labels.size() > 0) {
-        return true;
-    } else {
-        return false;
+    
+    printf("Number of labels successfully loaded: %ld\n", labels.size());
+    if (labels.size() != 0) {
+        return 0;
     }
+    else {
+        return 1;
+    }
+}
+
+Label *Labeler::process_label_line(std::string line, pcap_t *handle) {
+    Label *l;
+    std::string metadata, hash_key;
+    std::vector<std::string> line_tokens;
+
+    l = NULL;
+    tokenize_string(line, line_tokens, ',');
+    
+    /* Skip non-normal lines */
+    if(line_tokens[0][0] == '#') return l;
+    if(line_tokens.size() != 2 && line_tokens.size() != 3) {
+        fprintf(stderr, "Incorrect number of tokens on line: %s\n", line.c_str());
+        return l;
+    }
+    
+    /* Grab metadata and hashkey if it exists */
+    metadata = line_tokens[METADATA_LOC];
+    
+    hash_key = "";
+    if (line_tokens.size() == 3) {
+        hash_key = line_tokens[HASHKEY_LOC];
+    }
+
+    l = process_traffic_filter(line_tokens[TRAFFIC_LOC], hash_key, metadata, handle);
+
+    return l;
+}
+
+Label *Labeler::process_traffic_filter(std::string traffic_filter,
+                                       std::string hash_key,
+                                       std::string metadata,
+                                       pcap_t *handle) {
+    Label *l;
+    uint32_t i, rv;
+    uint64_t ts_start, ts_end;
+    std::string bpf_filter, file;
+    std::vector<std::string> filter_tokens, block_tokens;
+    
+    /* Defaults */
+    l = NULL;
+    file = "";
+    bpf_filter = "";
+    ts_start = 0;
+    ts_end = UINT64_MAX;
+    
+    /* Process each individual traffic filter */
+    tokenize_string(traffic_filter, filter_tokens, '|');
+    for (i = 0; i < filter_tokens.size(); i++) {
+            tokenize_string(filter_tokens[i], block_tokens, ':');
+            if(block_tokens[0] == "BPF") {
+                bpf_filter = block_tokens[1];
+            } else if(block_tokens[0] == "TS_START") {
+                ts_start = std::stoull(block_tokens[1]);
+            } else if(block_tokens[0] == "TS_END") {
+                ts_end = std::stoull(block_tokens[1]);
+            } else if(block_tokens[0] == "FILE") {
+                file = block_tokens[1];
+            } else {
+                fprintf(stderr, "Error with traffic filter: %s\n", filter_tokens[i].c_str());
+                return NULL;
+            }
+    }
+    
+    l = new Label();
+    rv = l->set_info(metadata, bpf_filter, file, hash_key,
+                     ts_start, ts_end, handle);
+    if(rv != 0) {
+        delete l;
+        return NULL;
+    }
+
+    return l;
+}
+
+int Labeler::process_traffic(PcapReader r) {
+    PcapPacketInfo *pi;
+    
+    while(1) {
+        if (stop) { 
+            break;
+        }
+        pi = r.get_next_packet();
+        if (pi == NULL) {
+            break;
+        } else if (pi->pcap_next_rv == PCAP_NEXT_EX_NOP) {
+            continue;
+        }
+        packets_received++;
+        process_packet(pi);
+        delete pi;
+    }
+    return 0;
 }

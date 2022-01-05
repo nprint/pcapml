@@ -26,12 +26,12 @@
 class PcapReader {
  public:
     void close_file();
+    void print_stats();
     pcap_t *get_pcap_t();
     uint16_t get_linktype();
     int open_live(char *devce);
     int open_file(char *infile);
-    void print_stats(FILE *stream);
-    pcap_packet_info *get_next_packet();
+    PcapPacketInfo *get_next_packet();
  private:
     pcap_t *f = NULL;
 };

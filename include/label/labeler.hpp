@@ -10,6 +10,8 @@
 
 #include <signal.h>
 
+static volatile int stop = 0;
+
 #include <vector>
 #include <fstream>
 
@@ -24,9 +26,22 @@
 
 class Labeler {
  public:
-    int load_labels(char *label_file, pcap_t *handle = NULL);
+    virtual void print_stats() = 0;
+    virtual uint32_t process_packet(PcapPacketInfo *pi) = 0;
+    
+    int process_traffic(PcapReader r);
+    int load_labels(std::string label_file, pcap_t *handle = NULL);
  protected:
+    PcapNGWriter w;
     std::vector<Label *> labels;
+    uint64_t packets_matched =  0;
+    uint64_t packets_received = 0;
+ private:
+    Label *process_label_line(std::string line, pcap_t *handle = NULL);
+    Label *process_traffic_filter(std::string traffic_filter,
+                                  std::string hash_key,
+                                  std::string metadata,
+                                  pcap_t *handle = NULL);
 };
 
 #endif  // INCLUDE_LABEL_LABELER_HPP_

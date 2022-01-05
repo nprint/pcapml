@@ -7,6 +7,10 @@
 
 #include "label.hpp"
 
+std::string Label::get_file() {
+    return file;
+}
+
 std::string Label::get_comment_string() {
     return comment_str;
 }
@@ -23,14 +27,12 @@ std::string Label::get_unhashed_sample_id() {
     return unhashed_sample_id;
 }
 
-bool Label::set_info(std::string label, std::string bpf_string_filter,
+uint32_t Label::set_info(std::string label, std::string bpf_string_filter,
                      std::string file, std::string hash_key, 
                      uint64_t ts_start, uint64_t ts_end, 
                      pcap_t *handle) {
-    bool rv;
     std::hash<std::string> str_hash;
 
-    rv = true;
     /* set passed in values */
     this->label = label;
     this->bpf_string_filter = bpf_string_filter;
@@ -48,7 +50,7 @@ bool Label::set_info(std::string label, std::string bpf_string_filter,
         if (pcap_compile(handle, bpf_pcap_filter,
                          bpf_string_filter.c_str(), 1, PCAP_NETMASK_UNKNOWN) != 0) {
             printf("Invalid BPF filter: %s\n", bpf_string_filter.c_str());
-            return false;
+            return 1;
         }
     }
 
@@ -65,10 +67,10 @@ bool Label::set_info(std::string label, std::string bpf_string_filter,
     /* mark that this label is ready */
     info_set = true;
 
-    return rv;
+    return 0;
 }
 
-bool Label::match_packet(pcap_packet_info *pi) {
+bool Label::match_packet(PcapPacketInfo *pi) {
     uint64_t pkt_ts;
     int bpf_match;
     bool ts_match;

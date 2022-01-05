@@ -7,72 +7,61 @@
 
 #include "pcap_labeler.hpp"
 
-void sig_handler(int useless) {
-    stop = 1;
-}
-
-bool PcapLabeler::label_pcap(char *label_file, char *infile, char *outfile,
-                             bool infile_is_device, bool stats_out) {
+uint32_t PcapLabeler::label_pcap(char *label_file, char *infile, char *outfile,
+                                 bool infile_is_device, bool stats_out) {
+    uint32_t rv;
     uint16_t linktype;
     std::vector<Label *>::iterator vit;
-    PcapNGWriter w;
     PcapReader r;
-    pcap_packet_info *pi;
 
+
+    /* IO */
     if (infile_is_device) {
         r.open_live(infile);
     } else {
         r.open_file(infile);
     }
 
-    /* IO */
     linktype = r.get_linktype();
     w.open_file(outfile);
     w.write_interface_block(linktype, 0);
 
     /* Load labels now that we have the pcap_t */
-    load_labels(label_file, r.get_pcap_t());
-
-    if (labels.size() == 0) {
-        printf("Cowardly refusing to label pcap without any labels loaded\n");
-        return false;
+    rv = load_labels(label_file, r.get_pcap_t());
+    if(rv != 0) {
+        fprintf(stderr, "Refusing to label pcap with zero labels loaded\n");
+        return 1;
     }
-
-    /* register signal now */
-    signal(SIGINT, sig_handler);
-
-    while (1) {
-        if (stop) {
-            break;
-        }
-        pi = r.get_next_packet();
-        if (pi == NULL) {
-            break;
-        } else if (pi->pcap_next_rv == PCAP_NEXT_EX_NOP) {
-            continue;
-        }
-
-        for (vit = labels.begin(); vit != labels.end(); vit++) {
-            /* match here */
-            if ((*vit)->match_packet(pi)) {
-                w.write_epb_from_pcap_pkt(pi, (*vit)->get_comment_string());
-                packets_matched++;
-                break;
-            }
-        }
-        delete pi;
-        packets_received++;
-    }
-    if (stats_out) {
-        print_stats(stdout);
-        r.print_stats(stdout);
-    }
+    
+    process_traffic(r);
+    
+    r.close_file();
     w.close_file();
 
-    return true;
+    if (stats_out) {
+        r.print_stats();
+        print_stats();
+    }
+
+    return 0;
 }
 
-void PcapLabeler::print_stats(FILE *stream) {
-    fprintf(stream, "Labeler: packets received: %ld\n", packets_received);
-    fprintf(stream, "Labeler: packets matched:  %ld\n", packets_matched);
+uint32_t PcapLabeler::process_packet(PcapPacketInfo *pi) {
+    std::vector<Label *>::iterator vit;
+    
+    for (vit = labels.begin(); vit != labels.end(); vit++) {
+        /* match here */
+        if ((*vit)->match_packet(pi)) {
+            w.write_epb_from_pcap_pkt(pi, (*vit)->get_comment_string());
+            packets_matched++;
+            return 0;
+        }
+    }
+    
+    return 1;
+}
+
+void PcapLabeler::print_stats() {
+    printf("Labeler: packets received: %ld\n", packets_received);
+    printf("Labeler: packets matched:  %ld\n", packets_matched);
 }

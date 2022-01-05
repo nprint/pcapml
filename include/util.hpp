@@ -19,7 +19,7 @@
 
 #include "block_pcapng.hpp"
 
-struct pcap_packet_info {
+struct PcapPacketInfo {
     struct pcap_pkthdr *hdr;
     const uint8_t *buf;
     int32_t pcap_next_rv;

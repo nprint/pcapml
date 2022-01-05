@@ -96,7 +96,7 @@ int PcapNGWriter::write_interface_block(uint16_t link_type, uint32_t snap_len) {
     return rv;
 }
 
-int PcapNGWriter::write_epb_from_pcap_pkt(pcap_packet_info *p, std::string comment) {
+int PcapNGWriter::write_epb_from_pcap_pkt(PcapPacketInfo *p, std::string comment) {
     uint32_t block_len, rv;
     EnhancedPacketBlock epb;
 

@@ -136,12 +136,13 @@ int main(int argc, char **argv) {
             printf("Labeling directory: %s\n", arguments.file_dir);
             d.label_dir(std::string(arguments.file_dir),
                         std::string(arguments.labels),
-                        std::string(arguments.outfile));
+                        std::string(arguments.outfile),
+                        arguments.stats);
         } else if (arguments.pcap != NULL) {
             printf("Labeling PCAP: %s\n", arguments.pcap);
             rv = labeler.label_pcap(arguments.labels, arguments.pcap,
                                     arguments.outfile, false, arguments.stats);
-            if (rv == false) {
+            if (rv != 0) {
                 printf("Failure while parsing pcap\n");
                 exit(4);
             }
@@ -149,7 +150,7 @@ int main(int argc, char **argv) {
             printf("processing live traffic\n");
             rv = labeler.label_pcap(arguments.labels, arguments.device,
                                     arguments.outfile, true, arguments.stats);
-            if (rv == false) {
+            if (rv !=  0) {
                 printf("Error parsing live traffic, exiting\n");
                 exit(5);
             }

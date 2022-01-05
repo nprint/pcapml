@@ -42,7 +42,7 @@ class PcapNGWriter {
     void close_file();
     int write_section_block();
     int write_interface_block(uint16_t link_type, uint32_t snap_len);
-    int write_epb_from_pcap_pkt(pcap_packet_info *pi, std::string comment);
+    int write_epb_from_pcap_pkt(PcapPacketInfo *pi, std::string comment);
  private:
     FILE *pcapng;
 
