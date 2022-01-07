@@ -16,7 +16,7 @@
 #include "splitter_pcapng.hpp"
 #include "stripper_pcapng.hpp"
 
-const char *argp_program_version = "pcapml 0.2.1";
+const char *argp_program_version = "pcapml 0.3.1";
 const char *argp_program_bug_address = "https://github.com/nprint/pcapml";
 static char doc[] = "pcapML standardzies the interactions with traffic analysis datasets";
 static char args_doc[] = "";

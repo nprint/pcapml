@@ -15,14 +15,17 @@ void sig_handler(int useless) {
 int Labeler::load_labels(std::string label_file, pcap_t *handle) {
     Label *l;
     std::string line;
+    uint64_t sample_number;
     
     /* register signal now as this is a one time process */
     signal(SIGINT, sig_handler);
 
     printf("Loading labels\n");
+    sample_number = 0;
     std::ifstream instream(label_file);
     while (getline(instream, line)) {
-        l = process_label_line(line, handle);
+        l = process_label_line(line, sample_number, handle);
+        sample_number++;
         if (l != NULL) {
             labels.push_back(l);
         }
@@ -36,7 +39,8 @@ int Labeler::load_labels(std::string label_file, pcap_t *handle) {
     }
 }
 
-Label *Labeler::process_label_line(std::string line, pcap_t *handle) {
+Label *Labeler::process_label_line(std::string line, uint64_t sample_number,
+                                   pcap_t *handle) {
     Label *l;
     std::string metadata, hash_key;
     std::vector<std::string> line_tokens;
@@ -59,12 +63,14 @@ Label *Labeler::process_label_line(std::string line, pcap_t *handle) {
         hash_key = line_tokens[HASHKEY_LOC];
     }
 
-    l = process_traffic_filter(line_tokens[TRAFFIC_LOC], hash_key, metadata, handle);
+    l = process_traffic_filter(sample_number, line_tokens[TRAFFIC_LOC], 
+                               hash_key, metadata, handle);
 
     return l;
 }
 
-Label *Labeler::process_traffic_filter(std::string traffic_filter,
+Label *Labeler::process_traffic_filter(uint64_t sample_number, 
+                                       std::string traffic_filter,
                                        std::string hash_key,
                                        std::string metadata,
                                        pcap_t *handle) {
@@ -73,6 +79,7 @@ Label *Labeler::process_traffic_filter(std::string traffic_filter,
     uint64_t ts_start, ts_end;
     std::string bpf_filter, file;
     std::vector<std::string> filter_tokens, block_tokens;
+    std::map<std::string, uint64_t>::iterator mit;
 
     /* Defaults */
     l = NULL;
@@ -98,9 +105,19 @@ Label *Labeler::process_traffic_filter(std::string traffic_filter,
                 return NULL;
             }
     }
+    
+    /* Check if we need to find the sampleID if the user supplied a key */
+    if(hash_key != "") {
+        mit = label_hash_map.find(hash_key);
+        if(mit == label_hash_map.end()) {
+            label_hash_map.insert(std::make_pair(hash_key, sample_number));
+        } else {
+            sample_number = mit->second;
+        }
+    }
 
     l = new Label();
-    rv = l->set_info(metadata, bpf_filter, file, hash_key,
+    rv = l->set_info(sample_number, metadata, bpf_filter, file,
                      ts_start, ts_end, handle);
     if (rv != 0) {
         delete l;
