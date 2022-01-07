@@ -18,22 +18,25 @@
 class Label {
  public:
     void print();
-    uint32_t set_info(std::string label, std::string bpf_filter = "",
-                  std::string file = "", std::string hash_key = "",
-                  uint64_t ts_start = 0, uint64_t ts_end = UINT64_MAX,
-                  pcap_t *handle = NULL);
+    uint32_t set_info(uint64_t sample_id, std::string metadata, 
+                      std::string bpf_filter = "", std::string file = "", 
+                      uint64_t ts_start = 0, uint64_t ts_end = UINT64_MAX,
+                      pcap_t *handle = NULL);
+    uint64_t get_sample_id();
     std::string get_file();
-    std::string get_label();
-    std::string get_sample_id();
+    std::string get_metadata();
     std::string get_comment_string();
-    std::string get_unhashed_sample_id();
     bool match_packet(PcapPacketInfo *pi);
  private:
     bool info_set = false;
-    uint64_t ts_start, ts_end;
+    uint64_t ts_end;
+    uint64_t ts_start;
+    uint64_t sample_id;
+    std::string file;
+    std::string metadata;
+    std::string comment_str;
     std::string bpf_string_filter;
     struct bpf_program *bpf_pcap_filter = NULL;
-    std::string sample_id, unhashed_sample_id, label, comment_str, file, hash_key;
 };
 
 #endif  // INCLUDE_LABEL_LABEL_HPP_

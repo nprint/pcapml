@@ -12,6 +12,7 @@
 
 static volatile int stop = 0;
 
+#include <map>
 #include <string>
 #include <vector>
 #include <fstream>
@@ -35,11 +36,14 @@ class Labeler {
  protected:
     PcapNGWriter w;
     std::vector<Label *> labels;
+    std::map<std::string, uint64_t> label_hash_map;
     uint64_t packets_matched =  0;
     uint64_t packets_received = 0;
  private:
-    Label *process_label_line(std::string line, pcap_t *handle = NULL);
-    Label *process_traffic_filter(std::string traffic_filter,
+    Label *process_label_line(std::string line, uint64_t sample_number,
+                              pcap_t *handle = NULL);
+    Label *process_traffic_filter(uint64_t sample_number,
+                                  std::string traffic_filter,
                                   std::string hash_key,
                                   std::string metadata,
                                   pcap_t *handle = NULL);
