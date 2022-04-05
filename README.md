@@ -1,6 +1,6 @@
 # pcapML
 
-For a project overview, detailed usage information, and installation information please visit [pcapml's project homepage](https://nprint.github.io/pcapml.html)
+For a project overview, detailed usage information, and installation information please visit the [pcapml's project homepage](https://nprint.github.io/pcapml)
 
 There will be bugs! Please report any you see.
 
