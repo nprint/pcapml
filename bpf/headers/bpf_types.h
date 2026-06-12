@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-2.0-only
 // Minimal type definitions for BPF programs that don't need CO-RE/BTF.
 // Replaces vmlinux.h when kernel BTF is unavailable.
 

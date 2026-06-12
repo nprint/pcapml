@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: (BSD-2-Clause OR GPL-2.0-only)
+// SPDX-License-Identifier: GPL-2.0-only
 // pcapml gateway: eBPF TC programs for network-path packet capture
 // (no process attribution, used on routers/middleboxes)
 
