@@ -1,10 +1,15 @@
-# data
+# Generated eBPF Go bindings and compiled bytecode
+pcapml_*.go
+pcapml_*.o
+cmd/pcapml_*.go
+cmd/pcapml_*.o
+
+# Generated kernel headers
+bpf/headers/vmlinux.h
+
+# Binary
+pcapml
+
+# Captured data
 *.pcapng
 *.pcap
-
-*.Po
-*.dirstamp
-*.in
-
-# c++
-*.o
