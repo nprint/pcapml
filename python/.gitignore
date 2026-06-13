@@ -1,0 +1,14 @@
+# The repo-root .gitignore ignores anything named "pcapml" (the Go binary) and
+# all *.pcapng (capture data). Both unintentionally match this package, so
+# re-include the source package and the small test fixtures here.
+!src/pcapml/
+!tests/data/*.pcapng
+
+# Python build artifacts and caches.
+build/
+dist/
+*.egg-info/
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/

@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pcapml"
+version = "0.1.0"
+description = "Read pcapml-labeled network traces (pcapng) into pandas DataFrames. Pure Python."
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Paul Schmitt", email = "paul.schmitt@gmail.com" }]
+keywords = ["pcap", "pcapng", "network", "traffic", "machine-learning", "pandas", "dataset"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Topic :: System :: Networking :: Monitoring",
+    "Topic :: Scientific/Engineering",
+    "Intended Audience :: Science/Research",
+]
+dependencies = ["pandas>=1.3"]
+
+[project.urls]
+Homepage = "https://github.com/nprint/pcapml"
+Repository = "https://github.com/nprint/pcapml"
+
+[project.optional-dependencies]
+test = ["pytest>=7.0"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+pcapml = ["py.typed"]
