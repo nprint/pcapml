@@ -27,6 +27,9 @@ IDB_OPT_TSRESOL = 9
 # is exactly how a reader bootstraps endianness for the rest of the section.
 _SHB_MAGIC_BYTES = b"\x0a\x0d\x0d\x0a"
 
+# Largest nanosecond count that fits pandas' datetime64[ns] (int64): year 2262.
+_MAX_NS = 2**63 - 1
+
 
 @dataclass
 class Interface:
@@ -35,6 +38,7 @@ class Interface:
     link_type: int
     snap_len: int
     ts_resol: float = 1e-6  # seconds per timestamp tick (pcapng default: microsec)
+    ts_resol_explicit: bool = False  # True when the IDB carried if_tsresol
 
 
 @dataclass
@@ -49,16 +53,35 @@ class Packet:
     comment: str
     link_type: int
     ts_resol: float
+    ts_resol_explicit: bool = True
 
     @property
-    def timestamp(self) -> float:
-        """Capture time as POSIX seconds (float)."""
-        return self.ts_ticks * self.ts_resol
+    def timestamp(self) -> Optional[float]:
+        """Capture time as POSIX seconds (float), or None if it can't be decoded."""
+        ns = self.ts_nanos
+        return None if ns is None else ns / 1e9
 
     @property
-    def ts_nanos(self) -> int:
-        """Capture time as integer nanoseconds (loss-free for ns/us/ms resolutions)."""
-        return int(round(self.ts_ticks * self.ts_resol * 1e9))
+    def ts_nanos(self) -> Optional[int]:
+        """Capture time as integer nanoseconds (loss-free for ns/us/ms resolutions).
+
+        Files written by older pcapml tools (e.g. the nPrint datasets) carry no
+        ``if_tsresol`` and store classic pcap time: seconds in the high 32 bits,
+        microseconds in the low 32. Read as plain microseconds that overflows
+        int64 nanoseconds, so when the resolution was not declared and the value
+        is out of range we decode it as seconds/microseconds instead, then as
+        nanoseconds, and give up (None) only if neither fits.
+        """
+        # Integer arithmetic: float ticks * resolution drifts by ~100 ns at
+        # present-day timestamps.
+        ticks_per_sec = round(1 / self.ts_resol)
+        ns = self.ts_ticks * 1_000_000_000 // ticks_per_sec
+        if self.ts_resol_explicit or ns <= _MAX_NS:
+            return ns
+        sec, frac = self.ts_ticks >> 32, self.ts_ticks & 0xFFFFFFFF
+        if frac < 1_000_000:
+            return sec * 1_000_000_000 + frac * 1_000
+        return self.ts_ticks if self.ts_ticks <= _MAX_NS else None
 
 
 def _read_exact(f: BinaryIO, n: int) -> Optional[bytes]:
@@ -154,11 +177,11 @@ def _iter_packets(f: BinaryIO) -> Iterator[Packet]:
 
 def _parse_idb(body: bytes, le: str) -> Interface:
     link_type, _reserved, snap_len = struct.unpack_from(le + "HHI", body, 0)
-    ts_resol = 1e-6
+    ts_resol, explicit = 1e-6, False
     for code, val in _iter_options(body, 8, le):
         if code == IDB_OPT_TSRESOL and val:
-            ts_resol = _ts_resol_from_byte(val[0])
-    return Interface(link_type=link_type, snap_len=snap_len, ts_resol=ts_resol)
+            ts_resol, explicit = _ts_resol_from_byte(val[0]), True
+    return Interface(link_type=link_type, snap_len=snap_len, ts_resol=ts_resol, ts_resol_explicit=explicit)
 
 
 def _parse_epb(body: bytes, le: str, interfaces: List[Interface]) -> Optional[Packet]:
@@ -190,4 +213,5 @@ def _parse_epb(body: bytes, le: str, interfaces: List[Interface]) -> Optional[Pa
         comment=comment,
         link_type=iface.link_type,
         ts_resol=iface.ts_resol,
+        ts_resol_explicit=iface.ts_resol_explicit,
     )

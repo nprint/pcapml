@@ -104,7 +104,9 @@ def _finalize(df: pd.DataFrame) -> pd.DataFrame:
     extra_cols = [c for c in df.columns if c not in COLUMNS]
     df = df[COLUMNS + extra_cols]
 
-    df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ns", utc=True)
+    # errors="coerce": a timestamp no decoding can place becomes NaT instead of
+    # failing the whole read.
+    df["timestamp"] = pd.to_datetime(df["timestamp"], unit="ns", utc=True, errors="coerce")
     for col in ("sample_id", "label", "direction", "dst", "src_ip", "dst_ip", "proto"):
         df[col] = df[col].astype("string")
     for col in ("src_port", "dst_port", "length"):
